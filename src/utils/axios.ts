@@ -1,15 +1,15 @@
 import axios from "axios";
 
-// Create an Axios instance
 const axiosInstance = axios.create({
-    baseURL: import.meta.env.VITE_BACKEND_URL || "https://jobplus-backend.vercel.app/",
+    baseURL: import.meta.env.PROD 
+        ? "https://jobplus-backend.vercel.app" 
+        : "http://localhost:5000",
     withCredentials: true,
     headers: {
         "Content-Type": "application/json",
     },
 });
 
-// Request interceptor
 axiosInstance.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem("token");
@@ -24,7 +24,6 @@ axiosInstance.interceptors.request.use(
     (error) => Promise.reject(error)
 );
 
-// Response interceptor
 axiosInstance.interceptors.response.use(
     (response) => response,
     (error) => {
