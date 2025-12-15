@@ -1,5 +1,5 @@
 import type React from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Navbar from "../../../components/global/Navbar";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { RadioGroup } from "@/components/ui/radio-group";
 import { toast } from "sonner";
 import { useDispatch, useSelector } from "react-redux";
@@ -29,8 +29,16 @@ export default function Signup() {
     role: "",
   });
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useDispatch();
-  const { loading } = useSelector((store: any) => store.auth);
+  const { loading, user } = useSelector((store: any) => store.auth);
+
+  useEffect(() => {
+    if (user && (user as any).email) {
+      const redirectTo = (location.state as any)?.from;
+      navigate(redirectTo || "/", { replace: true });
+    }
+  }, [user, navigate, location.state]);
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -58,7 +66,8 @@ export default function Signup() {
         localStorage.setItem("token", res.data.token)
         dispatch(setUser(res.data.user));
         toast.success(res.data.message);
-        navigate("/");
+        const redirectTo = (location.state as any)?.from;
+        navigate(redirectTo || "/");
         dispatch(setLoadnig(false));
       }
     } catch (error) {

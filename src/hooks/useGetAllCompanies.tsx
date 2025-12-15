@@ -10,12 +10,7 @@ const useGetAllCompanies = () => {
     useEffect(() => {
         const fetchCompanies = async () => {
             try {
-                const res = await axiosInstance.get(`/company/get`, {
-                    withCredentials: false,
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
+                const res = await axiosInstance.get(`/company/get`);
                 console.log("all companies from hook", res.data);
 
                 if (res.data.success) {

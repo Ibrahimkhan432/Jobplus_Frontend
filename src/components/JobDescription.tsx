@@ -1,8 +1,8 @@
 "use client"
-import { useNavigate, useParams } from "react-router-dom"
+import { useLocation, useNavigate, useParams } from "react-router-dom"
 import { Badge } from "./ui/badge"
 import { Button } from "./ui/button"
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { setSingleJob } from "../../redux/jobSlice"
 import { toast } from "sonner"
@@ -18,20 +18,42 @@ import {
   FileTextIcon,
 } from "lucide-react"
 
+type Salary = {
+  min: number
+  max: number
+  currency?: string
+}
+
 function JobDescription() {
   const navigate = useNavigate()
+  const location = useLocation()
   const params = useParams()
   const jobId = params.id
   const dispatch = useDispatch()
   const { user } = useSelector((store: any) => store.auth)
   const { singleJob } = useSelector((store: any) => store.job)
+  const [isLoading, setIsLoading] = useState(false)
+  const [loadError, setLoadError] = useState<string | null>(null)
+
+  const formaRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (formaRef.current) {
+      formaRef.current.scrollIntoView({ behavior: "auto", block: "start" })
+    }
+  }, [])
+
+  const normalizeId = (value: any) => {
+    if (!value) return null
+    if (typeof value === "string") return value
+    if (typeof value === "object" && value._id) return String(value._id)
+    if (typeof value?.toString === "function") return value.toString()
+    return null
+  }
 
   const isApplied =
     singleJob?.applications?.some(
       (application: any) =>
-        (typeof application.applicant === "string"
-          ? application.applicant
-          : application.applicant?._id) === user?._id
+        normalizeId(application?.applicant) === normalizeId(user?._id)
     ) || false;
 
   const applyJobHandler = async () => {
@@ -45,6 +67,7 @@ function JobDescription() {
         const jobRes = await axiosInstance.get(`/job/get/${jobId}`, {
           withCredentials: false,
         })
+        console.log("jobRes", jobRes)
         if (jobRes.data.success) {
           dispatch(setSingleJob(jobRes.data.job))
         }
@@ -53,54 +76,96 @@ function JobDescription() {
       console.log("error in apply job", error)
       if (error.response?.status === 401) {
         toast.error("Please login to apply for this job")
-        navigate("/login")
+        navigate("/login", {
+          state: { from: location.pathname },
+        })
       } else {
         toast.error(error.response?.data?.message || "Failed to apply for job")
       }
     }
   }
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return "Not specified"
+    const date = new Date(dateString)
+    if (Number.isNaN(date.getTime())) return "Not specified"
+    return date.toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
       day: "numeric",
     })
   }
 
-  const formatSalary = (salary: string) => {
-    return salary ? `$${Number.parseInt(salary).toLocaleString()}` : "Not specified"
+  const formatSalary = (salary?: Salary | number | string) => {
+    if (salary == null) return "Not specified"
+
+    if (typeof salary === "number") {
+      return `Rs ${salary.toLocaleString()}`
+    }
+
+    if (typeof salary === "string") {
+      const n = Number(salary)
+      return Number.isFinite(n) ? `Rs ${n.toLocaleString()}` : "Not specified"
+    }
+
+    const currency = (salary.currency || "PKR").toUpperCase()
+    const prefix = currency === "PKR" ? "Rs" : currency
+    const min = Number(salary.min)
+    const max = Number(salary.max)
+
+    if (!Number.isFinite(min) || !Number.isFinite(max)) return "Not specified"
+    return `${prefix} ${min.toLocaleString()} - ${max.toLocaleString()}`
   }
 
   useEffect(() => {
     const fetchSingleJob = async () => {
+      setIsLoading(true)
+      setLoadError(null)
       try {
         const res = await axiosInstance.get(`/job/get/${jobId}`, {
           withCredentials: false,
         })
         if (res.data.success) {
           dispatch(setSingleJob(res.data.job))
+        } else {
+          setLoadError(res.data?.message || "Failed to load job")
         }
       } catch (error) {
         console.log("error in get single job", error)
+        setLoadError("Error loading job")
+      } finally {
+        setIsLoading(false)
       }
     }
-    fetchSingleJob()
+    if (jobId) fetchSingleJob()
   }, [dispatch, jobId])
 
-  if (!singleJob) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-gray-500">Loading job details...</div>
       </div>
     )
   }
-  const formaRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (formaRef.current) {
-      formaRef.current.scrollIntoView({ behavior: "auto", block: "start" });
-    }
-  }, [formaRef.current]);
+
+  if (loadError) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen gap-4 px-4">
+        <div className="text-red-600">{loadError}</div>
+        <Button onClick={() => window.location.reload()} variant="outline">
+          Retry
+        </Button>
+      </div>
+    )
+  }
+
+  if (!singleJob) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-gray-500">Job not found</div>
+      </div>
+    )
+  }
 
   return (
     <div
@@ -134,7 +199,6 @@ function JobDescription() {
                   {singleJob?.position} positions
                 </Badge>
                 <Badge variant="secondary" className="px-3 py-1 text-sm font-medium  text-white">
-                  <h1 className="h-4 w-4 mr-1">Rs </h1>
                   {formatSalary(singleJob?.salary)}
                 </Badge>
                 <Badge variant="secondary" className="px-3 py-1 text-sm font-medium cursor-pointer">

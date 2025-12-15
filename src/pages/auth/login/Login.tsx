@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Navbar from "../../../components/global/Navbar";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useDispatch, useSelector } from "react-redux";
 import { setLoadnig, setUser } from "./../../../../redux/authSlice";
@@ -20,14 +20,16 @@ export default function Login() {
   console.log("input", input);
 
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useDispatch();
   const { loading, user } = useSelector((store: any) => store.auth);
 
   useEffect(() => {
     if (user && user.email) {
-      navigate("/", { replace: true });
+      const redirectTo = (location.state as any)?.from;
+      navigate(redirectTo || "/", { replace: true });
     }
-  }, [user, navigate]);
+  }, [user, navigate, location.state]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -45,7 +47,8 @@ export default function Login() {
         localStorage.setItem("token", res.data.token)
         dispatch(setUser(res.data.user));
         toast.success("Login successful");
-        navigate("/");
+        const redirectTo = (location.state as any)?.from;
+        navigate(redirectTo || "/");
       }
     } catch (error) {
       console.error("Error during Login:", error);

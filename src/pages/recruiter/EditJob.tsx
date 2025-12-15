@@ -12,7 +12,8 @@ const EditJob = () => {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    salary: "",
+    salaryMin: "",
+    salaryMax: "",
     location: "",
     requirement: "",
     position: "",
@@ -22,7 +23,15 @@ const EditJob = () => {
 
   useEffect(() => {
     axiosInstance.get(`/job/get/${id}`).then(({ data }) => {
-      if (data.success) setFormData(data.job);
+      if (data.success) {
+        const job = data.job || {};
+        setFormData((prev) => ({
+          ...prev,
+          ...job,
+          salaryMin: job.salaryMin ?? prev.salaryMin,
+          salaryMax: job.salaryMax ?? prev.salaryMax,
+        }));
+      }
     });
   }, [id]);
 
@@ -53,7 +62,8 @@ const EditJob = () => {
       </div>
       <form onSubmit={handleSubmit} className="space-y-4">
         <Input name="title" value={formData.title} onChange={handleChange} placeholder="Job Title" required />
-        <Input name="salary" value={formData.salary} onChange={handleChange} placeholder="Salary" required />
+        <Input name="salaryMin" value={(formData as any).salaryMin} onChange={handleChange} placeholder="Minimum Salary" required />
+        <Input name="salaryMax" value={(formData as any).salaryMax} onChange={handleChange} placeholder="Maximum Salary" required />
         <Input name="location" value={formData.location} onChange={handleChange} placeholder="Location" required />
         <Input name="requirement" value={formData.requirement} onChange={handleChange} placeholder="Requirement" required />
         <Input name="position" value={formData.position} onChange={handleChange} placeholder="Position (Number)" required />

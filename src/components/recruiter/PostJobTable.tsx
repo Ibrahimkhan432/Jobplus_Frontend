@@ -60,8 +60,22 @@ function PostJobTable() {
         })
     }
 
-    const formatSalary = (salary: string) => {
-        return salary ? `$${Number.parseInt(salary).toLocaleString()}` : "Not specified"
+    const formatSalary = (job: any) => {
+        const min = job?.salaryMin;
+        const max = job?.salaryMax;
+        if (min != null && max != null && min !== "" && max !== "") {
+            const nMin = Number(min);
+            const nMax = Number(max);
+            if (Number.isFinite(nMin) && Number.isFinite(nMax)) {
+                return `Rs ${nMin.toLocaleString()} - ${nMax.toLocaleString()}`;
+            }
+        }
+        const legacy = job?.salary;
+        if (legacy != null && legacy !== "") {
+            const n = Number(legacy);
+            return Number.isFinite(n) ? `Rs ${n.toLocaleString()}` : `Rs ${String(legacy)}`;
+        }
+        return "Not specified";
     }
 
     if (!filteredJobs || filteredJobs.length === 0) {
@@ -114,7 +128,7 @@ function PostJobTable() {
                                         <div className="flex items-center text-gray-600 text-sm">
                                             <DollarSignIcon className="h-4 w-4 mr-2 text-green-600" />
                                             <span className="font-medium">Salary:</span>
-                                            <span className="ml-1">{formatSalary(job.salary)}</span>
+                                            <span className="ml-1">{formatSalary(job)}</span>
                                         </div>
 
                                         <div className="flex items-center text-gray-600 text-sm">

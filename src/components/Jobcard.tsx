@@ -16,14 +16,34 @@ function highlightText(text: string, search: string) {
   );
 }
 
+function formatSalaryRange(job: any) {
+  const min = job?.salaryMin;
+  const max = job?.salaryMax;
+  if (min != null && max != null && min !== "" && max !== "") {
+    const nMin = Number(min);
+    const nMax = Number(max);
+    if (Number.isFinite(nMin) && Number.isFinite(nMax)) {
+      return `Rs ${nMin.toLocaleString()} - ${nMax.toLocaleString()}`;
+    }
+  }
+  if (job?.salary != null && job.salary !== "") {
+    return `Rs ${String(job.salary)}`;
+  }
+  return "Not specified";
+}
+
 const JobCard = ({ job, searchTerm }: any) => {
   const navigate = useNavigate();
 
   const daysAgoFunction = (mongodbTime: any) => {
+    if (!mongodbTime) return null;
     const createdAt = new Date(mongodbTime);
-    const daysAgo = Math.floor((Date.now() - createdAt.getTime()) / (1000 * 60 * 60 * 24));
-    return daysAgo;
+    const time = createdAt.getTime();
+    if (Number.isNaN(time)) return null;
+    return Math.floor((Date.now() - time) / (1000 * 60 * 60 * 24));
   };
+
+  const daysAgo = daysAgoFunction(job?.createdAt);
   return (
     <div
       onClick={() => navigate(`/description/${job._id}`)}
@@ -31,11 +51,13 @@ const JobCard = ({ job, searchTerm }: any) => {
       <div className="flex items-center justify-between mb-4 m-2">
         <p className="text-sm text-gray-500">
           {
-            daysAgoFunction(job?.createdAt) === 0
-              ? "Today"
-              : daysAgoFunction(job?.createdAt) === 1
-                ? "1 day ago"
-                : `${daysAgoFunction(job?.createdAt)} days ago`
+            daysAgo === null
+              ? ""
+              : daysAgo === 0
+                ? "Today"
+                : daysAgo === 1
+                  ? "1 day ago"
+                  : `${daysAgo} days ago`
           }
         </p>
         <Button variant="outline" size="icon" className="rounded-full">
@@ -68,7 +90,7 @@ const JobCard = ({ job, searchTerm }: any) => {
         </Badge>
         <Badge className="text-white font-medium border-primary bg-white text-primary"> Position: {job?.position}</Badge>
         <Badge className="text-white font-medium border-primary bg-white text-primary">{job?.jobType}</Badge>
-        <Badge className="text-white font-medium border-primary bg-white text-primary">Rs: {job?.salary}</Badge>
+        <Badge className="text-white font-medium border-primary bg-white text-primary">{formatSalaryRange(job)}</Badge>
       </div>
     </div>
   );

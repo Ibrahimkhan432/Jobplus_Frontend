@@ -16,7 +16,8 @@ const CreateJob = () => {
     const [formData, setFormData] = useState({
         title: "",
         description: "",
-        salary: "",
+        salaryMin: "",
+        salaryMax: "",
         location: "",
         requirement: "",
         position: "",
@@ -98,11 +99,25 @@ const CreateJob = () => {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label htmlFor="salary">Salary</Label>
+                                <Label htmlFor="salaryMin">Minimum Salary</Label>
                                 <Input
-                                    id="salary"
-                                    name="salary"
-                                    value={formData.salary}
+                                    id="salaryMin"
+                                    name="salaryMin"
+                                    type="number"
+                                    value={formData.salaryMin}
+                                    onChange={handleInputChange}
+                                    required
+                                    className="w-full"
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="salaryMax">Maximum Salary</Label>
+                                <Input
+                                    id="salaryMax"
+                                    name="salaryMax"
+                                    type="number"
+                                    value={formData.salaryMax}
                                     onChange={handleInputChange}
                                     required
                                     className="w-full"

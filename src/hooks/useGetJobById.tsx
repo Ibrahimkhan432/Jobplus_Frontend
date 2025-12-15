@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "sonner";
 import axiosInstance from "@/utils/axios";
-import { setSingleCompany } from "../../redux/companySlice";
+import { setSingleJob } from "../../redux/jobSlice";
 
 const useGetJobById = (jobId: string) => {
   const [loading, setLoading] = useState(true);
+  const [job, setJob] = useState<any>(null);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -20,7 +21,8 @@ const useGetJobById = (jobId: string) => {
         console.log("res useget for update ", res.data);
 
         if (res.data.success) {
-          dispatch(setSingleCompany(res.data.company));
+          dispatch(setSingleJob(res.data.job));
+          setJob(res.data.job);
         } else {
           toast.error("Failed to fetch job details");
         }
@@ -35,7 +37,7 @@ const useGetJobById = (jobId: string) => {
     fetchSingleJob();
   }, [jobId, dispatch]);
 
-  return { loading };
+  return { loading, job };
 };
 
 export default useGetJobById;
