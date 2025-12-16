@@ -14,7 +14,6 @@ import {
   FileTextIcon,
   MailIcon,
   MapPinIcon,
-  UserIcon,
   UsersIcon,
 } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
