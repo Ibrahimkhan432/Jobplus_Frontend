@@ -15,7 +15,6 @@ import {
   BriefcaseIcon,
   ClockIcon,
   CheckCircleIcon,
-  UserIcon,
   BuildingIcon,
   FileTextIcon,
 } from "lucide-react"
