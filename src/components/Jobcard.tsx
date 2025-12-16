@@ -32,7 +32,7 @@ function formatSalaryRange(job: any) {
   return "Not specified";
 }
 
-const JobCard = ({ job, searchTerm }: any) => {
+const JobCard = ({ job, searchTerm, onSelect, selected }: any) => {
   const navigate = useNavigate();
 
   const daysAgoFunction = (mongodbTime: any) => {
@@ -46,8 +46,17 @@ const JobCard = ({ job, searchTerm }: any) => {
   const daysAgo = daysAgoFunction(job?.createdAt);
   return (
     <div
-      onClick={() => navigate(`/description/${job._id}`)}
-      className="p-6 rounded-xl shadow-lg bg-white border border-gray-300 hover:shadow-lg transition-all duration-300 transform hover:scale-[1.03] m-4 sm:m-0 cursor-pointer">
+      onClick={() => {
+        if (typeof onSelect === "function") {
+          onSelect(job?._id);
+        } else {
+          navigate(`/description/${job._id}`);
+        }
+      }}
+      className={`p-6 rounded-xl shadow-lg bg-white border hover:shadow-lg transition-all duration-300 transform m-4 sm:m-0 cursor-pointer ${
+        selected ? "border-blue-500 ring-2 ring-blue-100" : "border-gray-300 hover:scale-[1.03]"
+      }`}
+    >
       <div className="flex items-center justify-between mb-4 m-2">
         <p className="text-sm text-gray-500">
           {
