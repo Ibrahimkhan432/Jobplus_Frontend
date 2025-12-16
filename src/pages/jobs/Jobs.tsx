@@ -12,14 +12,17 @@ import {
   CheckCircleIcon,
   ClockIcon,
   FileTextIcon,
+  MailIcon,
   MapPinIcon,
+  UserIcon,
   UsersIcon,
 } from "lucide-react";
-import { toast } from "sonner";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import ApplyFlowDialog from "@/components/ApplyFlowDialog";
 
 function Jobs() {
   const { allJobs } = useSelector((store: any) => store.job);
+  const { user } = useSelector((store: any) => store.auth);
   const [filters, setFilters] = useState<{ [key: string]: string }>({});
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -118,6 +121,20 @@ function Jobs() {
     fetchSelectedJob();
   }, [selectedJobId]);
 
+  const normalizeId = (value: any) => {
+    if (!value) return null;
+    if (typeof value === "string") return value;
+    if (typeof value === "object" && value._id) return String(value._id);
+    if (typeof value?.toString === "function") return value.toString();
+    return null;
+  };
+
+  const isApplied =
+    selectedJob?.applications?.some(
+      (application: any) =>
+        normalizeId(application?.applicant) === normalizeId(user?._id)
+    ) || false;
+
   const formatSalary = (job?: any) => {
     if (!job) return "Not specified";
     const min = job?.salaryMin;
@@ -136,30 +153,17 @@ function Jobs() {
     return "Not specified";
   };
 
-  const applyJobHandler = async () => {
+  const refetchSelectedJob = async () => {
+    if (!selectedJobId) return;
     try {
-      if (!selectedJobId) return;
-      const res = await axiosInstance.post(`/application/apply/${selectedJobId}`, {}, {
-        withCredentials: true,
+      const jobRes = await axiosInstance.get(`/job/get/${selectedJobId}`, {
+        withCredentials: false,
       });
-      if (res.data.success) {
-        toast.success("Applied successfully");
-        const jobRes = await axiosInstance.get(`/job/get/${selectedJobId}`, {
-          withCredentials: false,
-        });
-        if (jobRes.data.success) {
-          setSelectedJob(jobRes.data.job);
-        }
+      if (jobRes.data.success) {
+        setSelectedJob(jobRes.data.job);
       }
-    } catch (error: any) {
-      if (error.response?.status === 401) {
-        toast.error("Please login to apply for this job");
-        navigate("/login", {
-          state: { from: `/jobs?jobId=${selectedJobId}` },
-        });
-      } else {
-        toast.error(error.response?.data?.message || "Failed to apply for job");
-      }
+    } catch {
+      // ignore
     }
   };
 
@@ -248,6 +252,8 @@ function Jobs() {
                                 <MapPinIcon className="h-4 w-4 mr-2" />
                                 <span>{selectedJob?.location}</span>
                               </div>
+
+
                             </div>
                             <Button
                               variant="outline"
@@ -258,18 +264,18 @@ function Jobs() {
                           </div>
 
                           <div className="flex flex-wrap gap-2">
-                            <Badge variant="secondary" className="px-3 py-1 text-sm font-medium">
+                            <Badge variant="secondary" className="px-3 py-1 text-sm font-medium text-white">
                               <ClockIcon className="h-4 w-4 mr-1" />
                               {selectedJob?.experience} years exp
                             </Badge>
-                            <Badge variant="secondary" className="px-3 py-1 text-sm font-medium">
+                            <Badge variant="outline" className="px-3 py-1 text-sm font-medium">
                               <UsersIcon className="h-4 w-4 mr-1" />
                               {selectedJob?.position} positions
                             </Badge>
-                            <Badge variant="secondary" className="px-3 py-1 text-sm font-medium">
+                            <Badge variant="secondary" className="px-3 py-1 text-sm font-medium text-white">
                               {formatSalary(selectedJob)}
                             </Badge>
-                            <Badge variant="secondary" className="px-3 py-1 text-sm font-medium">
+                            <Badge variant="outline" className="px-3 py-1 text-sm font-medium">
                               <BuildingIcon className="h-4 w-4 mr-1" />
                               {selectedJob?.jobType}
                             </Badge>
@@ -282,15 +288,44 @@ function Jobs() {
                             </div>
                             <p className="text-gray-600 leading-relaxed line-clamp-6">{selectedJob?.description}</p>
                           </div>
-
-                          <div className="flex items-center justify-between pt-2">
-                            <Button
-                              onClick={applyJobHandler}
-                              className="bgMain-gradient text-white"
-                            >
-                              <CheckCircleIcon className="h-4 w-4 mr-2" />
-                              Apply
-                            </Button>
+                           <div className=" pt-4">
+                            <div className="flex items-center gap-2 mb-2">
+                              <UsersIcon className="h-5 w-5 text-blue-600" />
+                              <h3 className="text-lg font-semibold text-gray-900">Job Requirement</h3>
+                            </div>
+                            <p className="text-gray-600 leading-relaxed line-clamp-6">{selectedJob?.requirement}</p>
+                          </div>
+                          <div className="border-t pt-4">
+                          <h1 className="text-lg font-semibold text-gray-900">About Recruiter</h1>
+                            {selectedJob?.created_by?.email ? (
+                              <div className="flex items-center text-gray-600 mt-2">
+                                <MailIcon className="h-4 w-4 mr-2" />
+                                <span className="font-medium mr-1">Email:</span>
+                                <span>{selectedJob.created_by.email}</span>
+                              </div>
+                            ) : null}
+                          </div>
+                          < div className="flex items-center justify-between pt-2">
+                            {isApplied ? (
+                              <Button
+                                disabled
+                                className="text-white bgMain-gradient cursor-not-allowed"
+                              >
+                                <CheckCircleIcon className="h-4 w-4 mr-2" />
+                                Applied
+                              </Button>
+                            ) : (
+                              <ApplyFlowDialog
+                                jobId={selectedJobId}
+                                onApplied={refetchSelectedJob}
+                                trigger={
+                                  <Button className="text-white bgMain-gradient">
+                                    <CheckCircleIcon className="h-4 w-4 mr-2" />
+                                    Apply
+                                  </Button>
+                                }
+                              />
+                            )}
                           </div>
                         </div>
                       )}

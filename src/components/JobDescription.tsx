@@ -1,19 +1,21 @@
 "use client"
-import { useLocation, useNavigate, useParams } from "react-router-dom"
+import { useParams } from "react-router-dom"
 import { Badge } from "./ui/badge"
 import { Button } from "./ui/button"
 import { useEffect, useRef, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { setSingleJob } from "../../redux/jobSlice"
-import { toast } from "sonner"
 import axiosInstance from "@/utils/axios"
+import ApplyFlowDialog from "@/components/ApplyFlowDialog"
 import {
   MapPinIcon,
   CalendarIcon,
+  MailIcon,
   UsersIcon,
   BriefcaseIcon,
   ClockIcon,
   CheckCircleIcon,
+  UserIcon,
   BuildingIcon,
   FileTextIcon,
 } from "lucide-react"
@@ -25,8 +27,6 @@ type Salary = {
 }
 
 function JobDescription() {
-  const navigate = useNavigate()
-  const location = useLocation()
   const params = useParams()
   const jobId = params.id
   const dispatch = useDispatch()
@@ -56,32 +56,17 @@ function JobDescription() {
         normalizeId(application?.applicant) === normalizeId(user?._id)
     ) || false;
 
-  const applyJobHandler = async () => {
+  const refetchSingleJob = async () => {
+    if (!jobId) return
     try {
-      const res = await axiosInstance.post(`/application/apply/${jobId}`, {}, {
-        withCredentials: true,
+      const jobRes = await axiosInstance.get(`/job/get/${jobId}`, {
+        withCredentials: false,
       })
-      if (res.data.success) {
-        toast.success("Applied successfully")
-        // Refetch job to update applications
-        const jobRes = await axiosInstance.get(`/job/get/${jobId}`, {
-          withCredentials: false,
-        })
-        console.log("jobRes", jobRes)
-        if (jobRes.data.success) {
-          dispatch(setSingleJob(jobRes.data.job))
-        }
+      if (jobRes.data.success) {
+        dispatch(setSingleJob(jobRes.data.job))
       }
-    } catch (error: any) {
-      console.log("error in apply job", error)
-      if (error.response?.status === 401) {
-        toast.error("Please login to apply for this job")
-        navigate("/login", {
-          state: { from: location.pathname },
-        })
-      } else {
-        toast.error(error.response?.data?.message || "Failed to apply for job")
-      }
+    } catch {
+      // ignore
     }
   }
 
@@ -186,6 +171,13 @@ function JobDescription() {
                     <MapPinIcon className="h-5 w-5 mr-2" />
                     <span className="text-lg">{singleJob?.location}</span>
                   </div>
+                  {singleJob?.created_by?.email ? (
+                    <div className="flex items-center text-gray-600 mb-3">
+                      <MailIcon className="h-5 w-5 mr-2" />
+                      <span className="text-lg font-medium mr-2">Email:</span>
+                      <span className="text-lg">{singleJob.created_by.email}</span>
+                    </div>
+                  ) : null}
                 </div>
               </div>
 
@@ -194,37 +186,44 @@ function JobDescription() {
                   <ClockIcon className="h-4 w-4 mr-1 " />
                   {singleJob?.experience} years exp
                 </Badge>
-                <Badge variant="secondary" className="px-3 py-1 text-sm font-medium">
+                <Badge variant="outline" className="px-3 py-1 text-sm font-medium">
                   <UsersIcon className="h-4 w-4 mr-1" />
                   {singleJob?.position} positions
                 </Badge>
                 <Badge variant="secondary" className="px-3 py-1 text-sm font-medium  text-white">
                   {formatSalary(singleJob?.salary)}
                 </Badge>
-                <Badge variant="secondary" className="px-3 py-1 text-sm font-medium cursor-pointer">
+                <Badge variant="outline" className="px-3 py-1 text-sm font-medium cursor-pointer">
                   <BuildingIcon className="h-4 w-4 mr-1 " />
                   {singleJob?.jobType}
                 </Badge>
               </div>
             </div>
 
-            <div className="flex flex-col items-end gap-4">
-              <Button
-                onClick={applyJobHandler}
-                disabled={isApplied}
-                size="lg"
-                className={`px-8 py-3 text-lg font-semibold cursor-pointer text-white ${isApplied ? "bgMian-gradient hover:bg-green-600 cursor-not-allowed" : "bgMain-gradient hover:bg-blue-700"
-                  }`}
-              >
-                {isApplied ? (
-                  <>
-                    <CheckCircleIcon className="h-5 w-5 mr-2" />
-                    Applied
-                  </>
-                ) : (
-                  "Apply Now"
-                )}
-              </Button>
+            <div className="flex flex-col items-end gap-4 cursor-pointer">
+              {!jobId ? (
+                <Button disabled size="lg" className="px-8 py-3 text-lg font-semibold text-white bgMain-gradient cursor-not-allowed">
+                  Apply Now
+                </Button>
+              ) : isApplied ? (
+                <Button disabled size="lg" className="px-8 py-3 text-lg font-semibold text-white bgMain-gradient cursor-not-allowed">
+                  <CheckCircleIcon className="h-5 w-5 mr-2" />
+                  Applied
+                </Button>
+              ) : (
+                <ApplyFlowDialog
+                  jobId={jobId}
+                  onApplied={refetchSingleJob}
+                  trigger={
+                    <Button
+                      size="lg"
+                      className="px-8 py-3 text-lg font-semibold text-white bgMain-gradient hover:bg-blue-700"
+                    >
+                      Apply Now
+                    </Button>
+                  }
+                />
+              )}
             </div>
           </div>
         </div>
@@ -282,22 +281,26 @@ function JobDescription() {
           <p className="text-gray-600 mb-6">
             Take the next step in your career and apply for this exciting opportunity.
           </p>
-          <Button
-            onClick={applyJobHandler}
-            disabled={isApplied}
-            size="lg"
-            className={`px-8 py-3 text-lg font-semibold text-white ${isApplied ? "bgMain-gradient hover:bg-green-600 cursor-not-allowed" : "bgMain-gradient hover:bg-blue-700"
-              }`}
-          >
-            {isApplied ? (
-              <>
-                <CheckCircleIcon className="h-5 w-5 mr-2" />
-                Application Submitted
-              </>
-            ) : (
-              "Apply for this Position"
-            )}
-          </Button>
+          {!jobId ? (
+            <Button disabled size="lg" className="px-8 py-3 text-lg font-semibold text-white bgMain-gradient cursor-not-allowed">
+              Apply for this Position
+            </Button>
+          ) : isApplied ? (
+            <Button disabled size="lg" className="px-8 py-3 text-lg font-semibold text-white bgMain-gradient cursor-not-allowed">
+              <CheckCircleIcon className="h-5 w-5 mr-2" />
+              Application Submitted
+            </Button>
+          ) : (
+            <ApplyFlowDialog
+              jobId={jobId}
+              onApplied={refetchSingleJob}
+              trigger={
+                <Button size="lg" className="px-8 py-3 text-lg font-semibold text-white bgMain-gradient hover:bg-blue-700">
+                  Apply for this Position
+                </Button>
+              }
+            />
+          )}
         </div>
       </div>
     </div>

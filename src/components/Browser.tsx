@@ -4,10 +4,13 @@ import JobCard from "./Jobcard";
 import useGetAllJobs from "@/hooks/useGetAllJobs";
 import { setSearchedQuery } from "../../redux/jobSlice";
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 
 function Browser() {
   useGetAllJobs();
+
+  const navigate = useNavigate();
 
   const { allJobs } = useSelector((store: any) => store.job)
   const dispatch = useDispatch();
@@ -31,7 +34,11 @@ function Browser() {
         <div className="grid lg:grid-cols-3 gap-4 mt-2">
           {allJobs && allJobs.length > 0 ? (
             allJobs.map((job: any) => (
-              <JobCard key={job._id} job={job} />
+              <JobCard
+                key={job._id}
+                job={job}
+                onSelect={(id: string) => navigate(`/jobs?jobId=${id}`)}
+              />
             ))
           ) : (
             <div className="col-span-3 flex flex-col items-center justify-center py-20">
