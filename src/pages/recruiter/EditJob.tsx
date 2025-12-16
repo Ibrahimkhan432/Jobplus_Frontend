@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import axiosInstance from "@/utils/axios";
 import { toast } from "sonner";
 import { ArrowLeft } from "lucide-react";
+
+import { Box, Button, Container, IconButton, Paper, Stack, TextField, Typography } from "@mui/material";
 
 const EditJob = () => {
   const { id } = useParams();
@@ -35,12 +35,12 @@ const EditJob = () => {
     });
   }, [id]);
 
-  const handleChange = (e: any) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       const res = await axiosInstance.put(`/job/get/${id}`, formData);
@@ -55,31 +55,41 @@ const EditJob = () => {
   };
 
   return (
-    <div className="max-w-xl mx-auto p-6 mt-10 bg-white rounded-lg shadow">
-      <div className="flex items-center gap-2 mb-6">
-        <ArrowLeft className="cursor-pointer" onClick={() => navigate("/recruiter/dashboard")} />
-        <h1 className="text-2xl font-bold text-gray-900">Edit Job</h1>
-      </div>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <Input name="title" value={formData.title} onChange={handleChange} placeholder="Job Title" required />
-        <Input name="salaryMin" value={(formData as any).salaryMin} onChange={handleChange} placeholder="Minimum Salary" required />
-        <Input name="salaryMax" value={(formData as any).salaryMax} onChange={handleChange} placeholder="Maximum Salary" required />
-        <Input name="location" value={formData.location} onChange={handleChange} placeholder="Location" required />
-        <Input name="requirement" value={formData.requirement} onChange={handleChange} placeholder="Requirement" required />
-        <Input name="position" value={formData.position} onChange={handleChange} placeholder="Position (Number)" required />
-        <Input name="jobType" value={formData.jobType} onChange={handleChange} placeholder="Job Type (e.g. Full-Time)" required />
-        <Input name="experience" value={formData.experience} onChange={handleChange} placeholder="Experience (Years)" required />
-        <textarea
-          name="description"
-          value={formData.description}
-          onChange={handleChange}
-          placeholder="Job Description"
-          rows={4}
-          className="w-full border rounded-lg p-3"
-        ></textarea>
-        <Button type="submit" className="w-full text-white">Update Job</Button>
-      </form>
-    </div>
+    <Box>
+      <Container maxWidth="sm" sx={{ py: 4 }}>
+        <Paper elevation={1} sx={{ p: { xs: 2, sm: 3 }, borderRadius: 2 }}>
+          <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
+            <IconButton onClick={() => navigate("/recruiter/dashboard")}>
+              <ArrowLeft />
+            </IconButton>
+            <Typography variant="h5" sx={{ fontWeight: 700 }}>
+              Edit Job
+            </Typography>
+          </Stack>
+
+          <Box component="form" onSubmit={handleSubmit}>
+            <Stack spacing={2}>
+              <TextField label="Job Title" name="title" value={formData.title} onChange={handleChange} required fullWidth />
+              <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+                <TextField label="Minimum Salary" name="salaryMin" type="number" value={(formData as any).salaryMin} onChange={handleChange} required fullWidth />
+                <TextField label="Maximum Salary" name="salaryMax" type="number" value={(formData as any).salaryMax} onChange={handleChange} required fullWidth />
+              </Stack>
+              <TextField label="Location" name="location" value={formData.location} onChange={handleChange} required fullWidth />
+              <TextField label="Requirements" name="requirement" value={formData.requirement} onChange={handleChange} required fullWidth />
+              <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+                <TextField label="Positions" name="position" type="number" value={formData.position} onChange={handleChange} required fullWidth />
+                <TextField label="Experience (Years)" name="experience" type="number" value={formData.experience} onChange={handleChange} required fullWidth />
+              </Stack>
+              <TextField label="Job Type" name="jobType" value={formData.jobType} onChange={handleChange} required fullWidth />
+              <TextField label="Job Description" name="description" value={formData.description} onChange={handleChange} required fullWidth multiline rows={4} />
+              <Button type="submit" variant="contained" size="large">
+                Update Job
+              </Button>
+            </Stack>
+          </Box>
+        </Paper>
+      </Container>
+    </Box>
   );
 };
 

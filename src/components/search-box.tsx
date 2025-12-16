@@ -3,12 +3,20 @@
 import type React from "react"
 
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Search, MapPin, Briefcase } from "lucide-react"
 import { useDispatch } from "react-redux"
 import { useNavigate } from "react-router-dom"
 import { setSearchedQuery } from "../../redux/jobSlice"
+
+import {
+  Box,
+  Button,
+  MenuItem,
+  Paper,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material"
 
 export default function SearchBox() {
   const [query, setQuery] = useState("")
@@ -27,50 +35,83 @@ export default function SearchBox() {
   }
 
   return (
-    <form onSubmit={handleSearch} className="w-full max-w-4xl mx-auto">
-      <div className="bg-white p-3 rounded-xl shadow-lg flex flex-col md:flex-row gap-3 ">
-        <div className="flex-1 flex items-center px-4 py-2 bg-gray-50 rounded-lg">
-          <Search className="h-5 w-5 text-blue-400 mr-2" />
-          <Input
-            type="text"
-            placeholder="Job title, company"
+    <Box component="form" onSubmit={handleSearch} sx={{ width: "100%", maxWidth: 980, mx: "auto" }}>
+      <Paper
+        variant="outlined"
+        sx={{
+          p: 1.25,
+          borderRadius: 3,
+          backgroundColor: "rgba(255,255,255,0.75)",
+          backdropFilter: "blur(10px)",
+        }}
+      >
+        <Stack direction={{ xs: "column", md: "row" }} spacing={1.25}>
+          <TextField
+            fullWidth
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="flex-1 border-0 bg-transparent focus-visible:ring-0 focus:bg-blue-100 focus-visible:ring-offset-0 text-base"
+            placeholder="Job title, company"
+            size="small"
+            InputProps={{
+              startAdornment: (
+                <Box sx={{ display: "flex", alignItems: "center", pr: 1, color: "text.secondary" }}>
+                  <Search size={18} />
+                </Box>
+              ),
+            }}
           />
-        </div>
 
-        <div className="flex-1 flex items-center px-4 py-2 bg-gray-50 rounded-lg">
-          <MapPin className="h-5 w-5 text-blue-400 mr-2" />
-          <Input
-            type="text"
-            placeholder="City or location"
+          <TextField
+            fullWidth
             value={location}
             onChange={(e) => setLocation(e.target.value)}
-            className="flex-1 border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 focus:bg-blue-100 text-base"
+            placeholder="City or location"
+            size="small"
+            InputProps={{
+              startAdornment: (
+                <Box sx={{ display: "flex", alignItems: "center", pr: 1, color: "text.secondary" }}>
+                  <MapPin size={18} />
+                </Box>
+              ),
+            }}
           />
-        </div>
 
-        <div className="flex-1 flex items-center px-4 py-2 bg-gray-50 rounded-lg ">
-          <Briefcase className="h-5 w-5 text-blue-400 mr-2" />
-          <select
+          <TextField
+            select
+            fullWidth
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            className="flex-1 border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 text-base text-gray-600 outline-none"
+            size="small"
+            SelectProps={{ displayEmpty: true }}
+            InputProps={{
+              startAdornment: (
+                <Box sx={{ display: "flex", alignItems: "center", pr: 1, color: "text.secondary" }}>
+                  <Briefcase size={18} />
+                </Box>
+              ),
+            }}
           >
-            <option value="">All Categories</option>
-            <option value="technology">Technology</option>
-            <option value="design">Design</option>
-            <option value="marketing">Marketing</option>
-            <option value="finance">Finance</option>
-            <option value="healthcare">Healthcare</option>
-          </select>
-        </div>
+            <MenuItem value="">
+              <Typography variant="body2" color="text.secondary">
+                All Categories
+              </Typography>
+            </MenuItem>
+            <MenuItem value="technology">Technology</MenuItem>
+            <MenuItem value="design">Design</MenuItem>
+            <MenuItem value="marketing">Marketing</MenuItem>
+            <MenuItem value="finance">Finance</MenuItem>
+            <MenuItem value="healthcare">Healthcare</MenuItem>
+          </TextField>
 
-        <Button type="submit" className="bgMain-gradient hover:bg-blue-700 text-white px-8 py-2 h-auto cursor-pointer">
-          Search
-        </Button>
-      </div>
-    </form>
+          <Button
+            type="submit"
+            variant="contained"
+            sx={{ px: 3, whiteSpace: "nowrap", textTransform: "none" }}
+          >
+            Search
+          </Button>
+        </Stack>
+      </Paper>
+    </Box>
   )
 }

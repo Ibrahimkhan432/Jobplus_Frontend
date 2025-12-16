@@ -1,6 +1,7 @@
 import type React from "react"
 import { useState, useRef, useEffect } from "react"
-import { Button } from "@/components/ui/button"
+import { motion } from "framer-motion"
+import { Box, IconButton, Typography } from "@mui/material"
 import {
   ChevronLeft,
   ChevronRight,
@@ -80,46 +81,81 @@ export default function CategoryCarousel() {
 
 
   return (
-    <div className="relative w-full max-w-6xl mx-auto px-4 mt-8 ">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-bold text-white">Browse Categories</h2>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="icon"
-            className={`rounded-full bg-white/20 text-white border-white/40 hover:bg-white/30 ${!canScrollLeft ? "opacity-50 cursor-not-allowed" : ""
-              }`}
+    <Box sx={{ position: "relative", width: "100%", maxWidth: 1100, mx: "auto", px: { xs: 2, sm: 3 }, mt: 4 }}>
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2 }}>
+        <Typography variant="h6" sx={{ fontWeight: 800, color: "#fff" }}>
+          Browse Categories
+        </Typography>
+        <Box sx={{ display: "flex", gap: 1 }}>
+          <IconButton
+            size="small"
             onClick={() => scroll("left")}
             disabled={!canScrollLeft}
+            sx={{
+              border: "1px solid rgba(255,255,255,0.25)",
+              backgroundColor: "rgba(255,255,255,0.10)",
+              color: "#fff",
+              "&:hover": { backgroundColor: "rgba(255,255,255,0.16)" },
+            }}
           >
-            <ChevronLeft className="h-5 w-5" />
-            <span className="sr-only">Scroll left</span>
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            className={`rounded-full bg-white/20 text-white border-white/40 hover:bg-white/30 ${!canScrollRight ? "opacity-50 cursor-not-allowed" : ""
-              }`}
+            <ChevronLeft size={18} />
+          </IconButton>
+          <IconButton
+            size="small"
             onClick={() => scroll("right")}
             disabled={!canScrollRight}
+            sx={{
+              border: "1px solid rgba(255,255,255,0.25)",
+              backgroundColor: "rgba(255,255,255,0.10)",
+              color: "#fff",
+              "&:hover": { backgroundColor: "rgba(255,255,255,0.16)" },
+            }}
           >
-            <ChevronRight className="h-5 w-5" />
-            <span className="sr-only">Scroll right</span>
-          </Button>
-        </div>
-      </div>
+            <ChevronRight size={18} />
+          </IconButton>
+        </Box>
+      </Box>
 
-      <div ref={scrollRef} className="flex overflow-x-auto scrollbar-hide gap-4 pb-4 -mx-4 px-4 snap-x snap-mandatory">
-        {categories.map((category) => (
-          <Link key={category.id} to={`/jobs?category=${category.id}`} className="flex-shrink-0 snap-start">
-            <div className="bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-colors rounded-xl p-2 w-[100px] md:w-[200px] flex flex-col items-center text-center border border-white/30 ">
-              <div className="bg-white/20 p-2 text-white rounded-full mb-3">{category.icon}</div>
-              <h3 className="font-medium text-white mb-1">{category.name}</h3>
-              <p className="text-sm text-blue-100">{category.count} jobs</p>
-            </div>
+      <Box ref={scrollRef} className="scrollbar-hide" sx={{ display: "flex", overflowX: "auto", gap: 2, pb: 1.5, px: 0.5 }}>
+        {categories.map((category, idx) => (
+          <Link key={category.id} to={`/jobs?category=${category.id}`} className="flex-shrink-0">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.05 * idx, duration: 0.35 }}
+              whileHover={{ y: -2 }}
+              style={{ width: 220, maxWidth: "85vw" }}
+            >
+              <Box
+                sx={{
+                  borderRadius: 3,
+                  p: 2,
+                  border: "1px solid rgba(255,255,255,0.22)",
+                  backgroundColor: "rgba(255,255,255,0.10)",
+                  backdropFilter: "blur(10px)",
+                  color: "#fff",
+                  transition: "background-color 150ms ease",
+                  "&:hover": { backgroundColor: "rgba(255,255,255,0.14)" },
+                }}
+              >
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1.25 }}>
+                  <Box sx={{ width: 40, height: 40, borderRadius: 999, display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "rgba(255,255,255,0.14)" }}>
+                    <Box sx={{ color: "#fff" }}>{category.icon}</Box>
+                  </Box>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 800, color: "#fff" }}>
+                      {category.name}
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: "rgba(255,255,255,0.75)" }}>
+                      {category.count} jobs
+                    </Typography>
+                  </Box>
+                </Box>
+              </Box>
+            </motion.div>
           </Link>
         ))}
-      </div>
-    </div>
+      </Box>
+    </Box>
   )
 }

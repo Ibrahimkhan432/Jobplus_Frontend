@@ -5,8 +5,18 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import useGetAllJobs from "@/hooks/useGetAllJobs";
 import axiosInstance from "@/utils/axios";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import {
+  Alert,
+  Box,
+  Button,
+  Chip,
+  Container,
+  Divider,
+  Grid,
+  Paper,
+  Stack,
+  Typography,
+} from "@mui/material";
 import {
   BuildingIcon,
   CheckCircleIcon,
@@ -167,150 +177,165 @@ function Jobs() {
   };
 
   return (
-    <div>
-      <div className="sticky top-0 w-full z-50">
-        <Navbar />
-      </div>
-      <div className="max-w-8xl mx-auto  sm:px-6 lg:px-8 mt-6 mb-10">
-        <div className="flex flex-col lg:flex-row gap-6">
+    <Box>
+      <Navbar />
+      <Container maxWidth={false} sx={{ py: 3 }}>
+        <Grid container spacing={3}>
+          <Grid size={{ xs: 12, lg: 3 }} sx={{ display: { xs: "none", lg: "block" } }}>
+            <Box
+              sx={{
+                position: { lg: "sticky" },
+                top: { lg: 88 },
+                height: { lg: "calc(100vh - 112px)" },
+                overflowY: { lg: "auto" },
+                pr: { lg: 1 },
+              }}
+            >
+              <FilterCard onFilterChange={setFilters} />
+            </Box>
+          </Grid>
 
-          <div className="hidden lg:block lg:max-w-1/4 relative">
-            {/* Fixed FilterCard */}
-            <div className="">
-              <FilterCard
-                onFilterChange={setFilters}
-              />
-            </div>
-
-            <div className="lg:hidden">
-              <FilterCard
-                onFilterChange={setFilters}
-              />
-            </div>
-          </div>
-
-          <div className="flex-1">
+          <Grid size={{ xs: 12, lg: 9 }}>
             {filteredJobs.length <= 0 ? (
-              <div className="flex flex-col items-center justify-center w-full h-60 bg-white rounded-md shadow-md border border-gray-200">
-                <h1 className="text-2xl font-bold text-gray-800">No Jobs Found</h1>
-              </div>
+              <Paper variant="outlined" sx={{ p: 4, textAlign: "center" }}>
+                <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                  No Jobs Found
+                </Typography>
+              </Paper>
             ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <div className="lg:col-span-5">
-                  <div className="max-h-[calc(100vh-140px)] overflow-y-auto pr-2">
-                    <div className="space-y-4">
+              <Grid container spacing={3}>
+                <Grid size={{ xs: 12, lg: 5 }}>
+                  <Box
+                    sx={{
+                      position: { lg: "sticky" },
+                      top: { lg: 88 },
+                      height: { lg: "calc(100vh - 112px)" },
+                      overflowY: { lg: "auto" },
+                      pr: { lg: 1 },
+                    }}
+                  >
+                    <Stack spacing={2}>
                       {filteredJobs.slice(0, visibleCount).map((job: any) => (
-                        <div key={job?._id}>
-                          <JobCard
-                            job={job}
-                            searchTerm={filters.searchTerm || ""}
-                            selected={selectedJobId === job?._id}
-                            onSelect={(id: string) => {
-                              setSelectedJobId(id);
-                              setSearchParams((prev) => {
-                                const next = new URLSearchParams(prev);
-                                next.set("jobId", id);
-                                return next;
-                              }, { replace: true });
-                            }}
-                          />
-                        </div>
+                        <JobCard
+                          key={job?._id}
+                          job={job}
+                          searchTerm={filters.searchTerm || ""}
+                          selected={selectedJobId === job?._id}
+                          onSelect={(id: string) => {
+                            setSelectedJobId(id);
+                            setSearchParams((prev) => {
+                              const next = new URLSearchParams(prev);
+                              next.set("jobId", id);
+                              return next;
+                            }, { replace: true });
+                          }}
+                        />
                       ))}
-                      <div ref={loadMoreRef} className="h-10" />
-                    </div>
-                  </div>
-                </div>
+                      <Box ref={loadMoreRef} sx={{ height: 24 }} />
+                    </Stack>
+                  </Box>
+                </Grid>
 
-                <div className="hidden lg:block lg:col-span-7">
-                  <div className="sticky top-24">
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <Grid size={{ xs: 12, lg: 7 }} sx={{ display: { xs: "none", lg: "block" } }}>
+                  <Box sx={{ position: "sticky", top: 88 }}>
+                    <Paper variant="outlined" sx={{ p: 3, borderRadius: 2 }}>
                       {!selectedJobId ? (
-                        <div className="text-gray-500">Select a job to view details</div>
+                        <Typography variant="body2" color="text.secondary">
+                          Select a job to view details
+                        </Typography>
                       ) : isLoadingDetail ? (
-                        <div className="text-gray-500">Loading job details...</div>
+                        <Typography variant="body2" color="text.secondary">
+                          Loading job details...
+                        </Typography>
                       ) : detailError ? (
-                        <div className="flex items-center justify-between gap-4">
-                          <div className="text-red-600">{detailError}</div>
+                        <Stack direction="row" spacing={2} alignItems="center" justifyContent="space-between">
+                          <Alert severity="error" sx={{ flex: 1 }}>
+                            {detailError}
+                          </Alert>
                           <Button
-                            variant="outline"
+                            variant="outlined"
                             onClick={() => {
                               setSelectedJobId((id) => (id ? `${id}` : id));
                             }}
                           >
                             Retry
                           </Button>
-                        </div>
+                        </Stack>
                       ) : !selectedJob ? (
-                        <div className="text-gray-500">Job not found</div>
+                        <Typography variant="body2" color="text.secondary">
+                          Job not found
+                        </Typography>
                       ) : (
-                        <div className="space-y-4">
-                          <div className="flex items-start justify-between gap-4">
-                            <div>
-                              <h2 className="text-2xl font-bold text-gray-900">{selectedJob?.title}</h2>
-                              <div className="flex items-center text-gray-600 mt-2">
-                                <MapPinIcon className="h-4 w-4 mr-2" />
-                                <span>{selectedJob?.location}</span>
-                              </div>
-
-
-                            </div>
-                            <Button
-                              variant="outline"
-                              onClick={() => navigate(`/description/${selectedJobId}`)}
-                            >
+                        <Stack spacing={2}>
+                          <Stack direction="row" spacing={2} alignItems="flex-start" justifyContent="space-between">
+                            <Box sx={{ flex: 1 }}>
+                              <Typography variant="h6" sx={{ fontWeight: 800 }}>
+                                {selectedJob?.title}
+                              </Typography>
+                              <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 1 }}>
+                                <MapPinIcon size={16} />
+                                <Typography variant="body2" color="text.secondary">
+                                  {selectedJob?.location}
+                                </Typography>
+                              </Stack>
+                            </Box>
+                            <Button variant="outlined" onClick={() => navigate(`/description/${selectedJobId}`)}>
                               Open
                             </Button>
-                          </div>
+                          </Stack>
 
-                          <div className="flex flex-wrap gap-2">
-                            <Badge variant="secondary" className="px-3 py-1 text-sm font-medium text-white">
-                              <ClockIcon className="h-4 w-4 mr-1" />
-                              {selectedJob?.experience} years exp
-                            </Badge>
-                            <Badge variant="outline" className="px-3 py-1 text-sm font-medium">
-                              <UsersIcon className="h-4 w-4 mr-1" />
-                              {selectedJob?.position} positions
-                            </Badge>
-                            <Badge variant="secondary" className="px-3 py-1 text-sm font-medium text-white">
-                              {formatSalary(selectedJob)}
-                            </Badge>
-                            <Badge variant="outline" className="px-3 py-1 text-sm font-medium">
-                              <BuildingIcon className="h-4 w-4 mr-1" />
-                              {selectedJob?.jobType}
-                            </Badge>
-                          </div>
+                          <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+                            <Chip icon={<ClockIcon size={16} />} label={`${selectedJob?.experience} years exp`} variant="outlined" />
+                            <Chip icon={<UsersIcon size={16} />} label={`${selectedJob?.position} positions`} variant="outlined" />
+                            <Chip label={formatSalary(selectedJob)} variant="outlined" />
+                            <Chip icon={<BuildingIcon size={16} />} label={`${selectedJob?.jobType}`} variant="outlined" />
+                          </Stack>
 
-                          <div className="border-t pt-4">
-                            <div className="flex items-center gap-2 mb-2">
-                              <FileTextIcon className="h-5 w-5 text-blue-600" />
-                              <h3 className="text-lg font-semibold text-gray-900">Job Description</h3>
-                            </div>
-                            <p className="text-gray-600 leading-relaxed line-clamp-6">{selectedJob?.description}</p>
-                          </div>
-                           <div className=" pt-4">
-                            <div className="flex items-center gap-2 mb-2">
-                              <UsersIcon className="h-5 w-5 text-blue-600" />
-                              <h3 className="text-lg font-semibold text-gray-900">Job Requirement</h3>
-                            </div>
-                            <p className="text-gray-600 leading-relaxed line-clamp-6">{selectedJob?.requirement}</p>
-                          </div>
-                          <div className="border-t pt-4">
-                          <h1 className="text-lg font-semibold text-gray-900">About Recruiter</h1>
+                          <Divider />
+
+                          <Box>
+                            <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+                              <FileTextIcon size={18} />
+                              <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>
+                                Job Description
+                              </Typography>
+                            </Stack>
+                            <Typography variant="body2" color="text.secondary">
+                              {selectedJob?.description}
+                            </Typography>
+                          </Box>
+
+                          <Box>
+                            <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+                              <UsersIcon size={18} />
+                              <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>
+                                Job Requirement
+                              </Typography>
+                            </Stack>
+                            <Typography variant="body2" color="text.secondary">
+                              {selectedJob?.requirement}
+                            </Typography>
+                          </Box>
+
+                          <Divider />
+
+                          <Box>
+                            <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>
+                              About Recruiter
+                            </Typography>
                             {selectedJob?.created_by?.email ? (
-                              <div className="flex items-center text-gray-600 mt-2">
-                                <MailIcon className="h-4 w-4 mr-2" />
-                                <span className="font-medium mr-1">Email:</span>
-                                <span>{selectedJob.created_by.email}</span>
-                              </div>
+                              <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 1 }}>
+                                <MailIcon size={16} />
+                                <Typography variant="body2" color="text.secondary">
+                                  {selectedJob.created_by.email}
+                                </Typography>
+                              </Stack>
                             ) : null}
-                          </div>
-                          < div className="flex items-center justify-between pt-2">
+                          </Box>
+
+                          <Box sx={{ pt: 1 }}>
                             {isApplied ? (
-                              <Button
-                                disabled
-                                className="text-white bgMain-gradient cursor-not-allowed"
-                              >
-                                <CheckCircleIcon className="h-4 w-4 mr-2" />
+                              <Button variant="contained" disabled startIcon={<CheckCircleIcon size={18} />}>
                                 Applied
                               </Button>
                             ) : (
@@ -318,26 +343,24 @@ function Jobs() {
                                 jobId={selectedJobId}
                                 onApplied={refetchSelectedJob}
                                 trigger={
-                                  <Button className="text-white bgMain-gradient">
-                                    <CheckCircleIcon className="h-4 w-4 mr-2" />
+                                  <Button variant="contained" startIcon={<CheckCircleIcon size={18} />}>
                                     Apply
                                   </Button>
                                 }
                               />
                             )}
-                          </div>
-                        </div>
+                          </Box>
+                        </Stack>
                       )}
-                    </div>
-                  </div>
-                </div>
-              </div>
+                    </Paper>
+                  </Box>
+                </Grid>
+              </Grid>
             )}
-          </div>
-
-        </div>
-      </div>
-    </div>
+          </Grid>
+        </Grid>
+      </Container>
+    </Box>
   );
 }
 

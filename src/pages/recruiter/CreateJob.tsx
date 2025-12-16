@@ -1,15 +1,27 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import Navbar from "@/components/global/Navbar";
-import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { useSelector } from "react-redux";
 import axiosInstance from "@/utils/axios";
 import useGetAllCompanies from "@/hooks/useGetAllCompanies";
+
+import {
+    Box,
+    Button,
+    Container,
+    FormControl,
+    IconButton,
+    InputLabel,
+    MenuItem,
+    Paper,
+    Select,
+    Stack,
+    TextField,
+    Typography,
+} from "@mui/material";
+import type { SelectChangeEvent } from "@mui/material/Select";
 
 const CreateJob = () => {
     const navigate = useNavigate();
@@ -29,11 +41,19 @@ const CreateJob = () => {
         experience: ""
     });
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const handleTextChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
-        setFormData(prev => ({
+        setFormData((prev) => ({
             ...prev,
-            [name]: value
+            [name]: value,
+        }));
+    };
+
+    const handleCompanyChange = (e: SelectChangeEvent<string>) => {
+        const { name, value } = e.target;
+        setFormData((prev) => ({
+            ...prev,
+            [name]: value,
         }));
     };
 
@@ -63,178 +83,153 @@ const CreateJob = () => {
     };
 
     return (
-        <div>
-            <div className="bgMain-gradient">
-                <Navbar />
-            </div>
-            <div className="max-w-2xl mx-auto mt-10 px-4 sm:px-6 lg:px-8">
-                <div className="bg-white rounded-lg shadow-md p-6">
-                    <div className="flex items-center gap-2 mb-6">
-                        <ArrowLeft className="cursor-pointer" onClick={() => navigate("/recruiter/dashboard")} />
-                        <h1 className="text-2xl font-bold text-gray-900">Create New Job</h1>
-                    </div>
+        <Box>
+            <Navbar />
+            <Container maxWidth="md" sx={{ py: 4 }}>
+                <Paper elevation={1} sx={{ p: { xs: 2, sm: 3 }, borderRadius: 2 }}>
+                    <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
+                        <IconButton onClick={() => navigate("/recruiter/dashboard")}>
+                            <ArrowLeft />
+                        </IconButton>
+                        <Typography variant="h5" sx={{ fontWeight: 700 }}>
+                            Create New Job
+                        </Typography>
+                    </Stack>
 
-                    <form onSubmit={handleSubmit} className="space-y-6">
-                        <div className="space-y-2">
-                            <Label htmlFor="title">Job Title</Label>
-                            <Input
-                                id="title"
+                    <Box component="form" onSubmit={handleSubmit}>
+                        <Stack spacing={2.5}>
+                            <TextField
+                                label="Job Title"
                                 name="title"
                                 value={formData.title}
-                                onChange={handleInputChange}
+                                onChange={handleTextChange}
                                 required
-                                className="w-full"
+                                fullWidth
                             />
-                        </div>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="description">Description</Label>
-                            <Textarea
-                                id="description"
+                            <TextField
+                                label="Description"
                                 name="description"
                                 value={formData.description}
-                                onChange={handleInputChange}
+                                onChange={handleTextChange}
                                 required
-                                className="w-full"
+                                fullWidth
+                                multiline
                                 rows={4}
                             />
-                        </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="salaryMin">Minimum Salary</Label>
-                                <Input
-                                    id="salaryMin"
+                            <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+                                <TextField
+                                    label="Minimum Salary"
                                     name="salaryMin"
                                     type="number"
                                     value={formData.salaryMin}
-                                    onChange={handleInputChange}
+                                    onChange={handleTextChange}
                                     required
-                                    className="w-full"
+                                    fullWidth
                                 />
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label htmlFor="salaryMax">Maximum Salary</Label>
-                                <Input
-                                    id="salaryMax"
+                                <TextField
+                                    label="Maximum Salary"
                                     name="salaryMax"
                                     type="number"
                                     value={formData.salaryMax}
-                                    onChange={handleInputChange}
+                                    onChange={handleTextChange}
                                     required
-                                    className="w-full"
+                                    fullWidth
                                 />
-                            </div>
+                            </Stack>
 
-                            <div className="space-y-2">
-                                <Label htmlFor="location">Location</Label>
-                                <Input
-                                    id="location"
-                                    name="location"
-                                    value={formData.location}
-                                    onChange={handleInputChange}
-                                    required
-                                    className="w-full"
-                                />
-                            </div>
-                        </div>
+                            <TextField
+                                label="Location"
+                                name="location"
+                                value={formData.location}
+                                onChange={handleTextChange}
+                                required
+                                fullWidth
+                            />
 
-                        <div className="space-y-2">
-                            <Label htmlFor="requirement">Requirements</Label>
-                            <Textarea
-                                id="requirement"
+                            <TextField
+                                label="Requirements"
                                 name="requirement"
                                 value={formData.requirement}
-                                onChange={handleInputChange}
+                                onChange={handleTextChange}
                                 required
-                                className="w-full"
+                                fullWidth
+                                multiline
                                 rows={3}
                             />
-                        </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="position">Number of Positions</Label>
-                                <Input
-                                    id="position"
+                            <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+                                <TextField
+                                    label="Number of Positions"
                                     name="position"
                                     type="number"
                                     value={formData.position}
-                                    onChange={handleInputChange}
+                                    onChange={handleTextChange}
                                     required
-                                    className="w-full"
+                                    fullWidth
                                 />
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label htmlFor="experience">Experience (years)</Label>
-                                <Input
-                                    id="experience"
+                                <TextField
+                                    label="Experience (years)"
                                     name="experience"
                                     type="number"
                                     value={formData.experience}
-                                    onChange={handleInputChange}
+                                    onChange={handleTextChange}
                                     required
-                                    className="w-full"
+                                    fullWidth
                                 />
-                            </div>
-                        </div>
+                            </Stack>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="jobType">Job Type</Label>
-                                <Input
-                                    id="jobType"
+                            <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+                                <TextField
+                                    label="Job Type"
                                     name="jobType"
                                     value={formData.jobType}
-                                    onChange={handleInputChange}
+                                    onChange={handleTextChange}
                                     required
-                                    className="w-full p-2 border rounded-md"
-                                >
+                                    fullWidth
+                                />
 
-                                </Input>
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label htmlFor="company">Company</Label>
                                 {companies && companies.length > 0 ? (
-                                    <select
-                                        id="company"
-                                        name="company"
-                                        value={formData.company}
-                                        onChange={handleInputChange}
-                                        required
-                                        className="w-full p-2 border rounded-md"
-                                    >
-                                        <option value="">Select Company</option>
-                                        {companies.map((company: any) => (
-                                            <option key={company._id} value={company._id}>
-                                                {company.name}
-                                            </option>
-                                        ))}
-                                    </select>
+                                    <FormControl fullWidth required>
+                                        <InputLabel id="company-label">Company</InputLabel>
+                                        <Select
+                                            labelId="company-label"
+                                            label="Company"
+                                            name="company"
+                                            value={formData.company}
+                                            onChange={handleCompanyChange}
+                                        >
+                                            <MenuItem value="">
+                                                <em>Select Company</em>
+                                            </MenuItem>
+                                            {companies.map((company: any) => (
+                                                <MenuItem key={company._id} value={company._id}>
+                                                    {company.name}
+                                                </MenuItem>
+                                            ))}
+                                        </Select>
+                                    </FormControl>
                                 ) : (
-                                    <Input
-                                        id="company"
+                                    <TextField
+                                        label="Company"
                                         name="company"
                                         value={formData.company}
-                                        onChange={handleInputChange}
+                                        onChange={handleTextChange}
                                         required
-                                        placeholder="Enter company name"
-                                        className="w-full"
+                                        fullWidth
                                     />
                                 )}
-                            </div>
-                        </div>
+                            </Stack>
 
-                        <Button type="submit" className="w-full bg-primary text-white cursor-pointer">
-                            Create Job
-                        </Button>
-                    </form>
-                </div>
-            </div>
-        </div>
+                            <Button type="submit" variant="contained" size="large">
+                                Create Job
+                            </Button>
+                        </Stack>
+                    </Box>
+                </Paper>
+            </Container>
+        </Box>
     );
 };
 

@@ -1,53 +1,59 @@
 import { useSelector } from "react-redux";
-import { Badge } from "./ui/badge";
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "./ui/table";
+import { Box, Chip, Typography } from "@mui/material";
+import { DataGrid, GridOverlay, type GridColDef } from "@mui/x-data-grid";
 
 function AppliedJobTable() {
   const allAppliedJobs = useSelector((store: any) => store.job.allAppliedJobs);
+
+  const rows = (allAppliedJobs || []).map((appliedJob: any) => ({
+    id: appliedJob?._id,
+    date: appliedJob?.createdAt ? String(appliedJob.createdAt).split("T")[0] : "",
+    role: appliedJob?.job?.title ?? "",
+    company: appliedJob?.job?.company?.name ?? "",
+    status: String(appliedJob?.status || "").toLowerCase(),
+  }));
+
+  const NoRows = () => (
+    <GridOverlay>
+      <Box sx={{ p: 2 }}>
+        <Typography variant="body2" color="text.secondary">
+          You haven't applied any job yet.
+        </Typography>
+      </Box>
+    </GridOverlay>
+  );
+
+  const columns: GridColDef[] = [
+    { field: "date", headerName: "Date", width: 120 },
+    { field: "role", headerName: "Job Role", flex: 1, minWidth: 180 },
+    { field: "company", headerName: "Company", flex: 1, minWidth: 160 },
+    {
+      field: "status",
+      headerName: "Status",
+      width: 140,
+      renderCell: (params) => {
+        const value = String(params.value || "");
+        const color = value === "accepted" ? "success" : value === "rejected" ? "error" : "warning";
+        return <Chip size="small" label={value.toUpperCase()} color={color as any} variant="outlined" />;
+      },
+    },
+  ];
+
   return (
-    <div>
-      <Table className="w-full  border border-gray-200 rounded-2xl shadow-sm rounded-lg">
-        <TableCaption>A list of jobs you have applied for</TableCaption>
-        <TableHeader>
-          <TableRow className="bg-gray-100">
-            <TableHead>Date</TableHead>
-            <TableHead>Job Role</TableHead>
-            <TableHead>Company</TableHead>
-            <TableHead className="text-right">Status</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {allAppliedJobs && allAppliedJobs.length > 0 ? (
-            allAppliedJobs.map((appliedJob: any) => (
-              <TableRow key={appliedJob._id}>
-                <TableCell>{appliedJob?.createdAt?.split("T")[0]}</TableCell>
-                <TableCell>{appliedJob.job?.title}</TableCell>
-                <TableCell>{appliedJob.job?.company?.name}</TableCell>
-                <TableCell className="text-right">
-                  <Badge className={`${appliedJob?.status === "rejected" ? 'text-red-400' : 'text-white'}`}>
-                    {appliedJob.status.toUpperCase()}
-                  </Badge>
-                </TableCell>
-              </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={4} className="text-center text-gray-500">
-                You haven't applied any job yet.
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
-    </div>
+    <Box sx={{ height: 420, width: "100%" }}>
+      <DataGrid
+        rows={rows}
+        columns={columns}
+        disableRowSelectionOnClick
+        pageSizeOptions={[10, 25, 50]}
+        initialState={{
+          pagination: { paginationModel: { pageSize: 10, page: 0 } },
+        }}
+        slots={{
+          noRowsOverlay: NoRows,
+        }}
+      />
+    </Box>
   );
 }
 

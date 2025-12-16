@@ -1,7 +1,8 @@
 import { Link, useNavigate } from "react-router-dom";
-import { Button } from "./ui/button";
 import { useSelector } from "react-redux";
 import JobCard from "./Jobcard";
+import { motion } from "framer-motion";
+import { Box, Button, Container, Stack, Typography } from "@mui/material";
 
 function LatestJobs() {
   const navigate = useNavigate();
@@ -9,50 +10,71 @@ function LatestJobs() {
   console.log("allJobs in LatestJobs:", allJobs);
 
   return (
-    <section className="px-4 sm:px-6 lg:px-10 py-10">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10">
-          <div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
-              Featured Jobs
-            </h2>
-            <p className="text-sm sm:text-base text-blue-600 mt-2">
-              Explore our latest job opportunities
-            </p>
-          </div>
-          <div>
-            <Link to="/jobs">
-              <Button className="w-full sm:w-auto bg-blue-600 text-white hover:bg-blue-500 cursor-pointer border border-blue-200 shadow-sm">
-                View All Jobs
-              </Button>
-            </Link>
-          </div>
-        </div>
+    <Box component="section" sx={{ py: { xs: 6, md: 8 } }}>
+      <Container maxWidth="lg">
+        <motion.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>
+          <Stack direction={{ xs: "column", md: "row" }} spacing={2} alignItems={{ md: "center" }} justifyContent="space-between" sx={{ mb: 4 }}>
+            <Box>
+              <Typography variant="h4" sx={{ fontWeight: 900, color: "#fff" }}>
+                Featured Jobs
+              </Typography>
+              <Typography variant="body2" sx={{ mt: 1, color: "rgba(255,255,255,0.78)" }}>
+                Explore our latest job opportunities
+              </Typography>
+            </Box>
+            <Button
+              component={Link}
+              to="/jobs"
+              variant="contained"
+              sx={{ textTransform: "none", alignSelf: { xs: "stretch", md: "auto" } }}
+            >
+              View All Jobs
+            </Button>
+          </Stack>
+        </motion.div>
 
-        {/* Jobs Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", lg: "1fr 1fr 1fr" },
+            gap: 2.5,
+          }}
+        >
           {allJobs?.length === 0 ? (
-            <div className="col-span-full flex flex-col items-center justify-center py-16 px-4 bg-white rounded-xl shadow-sm border border-gray-200 text-center">
-              <h1 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-2">
+            <Box
+              sx={{
+                gridColumn: "1 / -1",
+                p: 4,
+                borderRadius: 3,
+                border: "1px solid rgba(255,255,255,0.18)",
+                backgroundColor: "rgba(255,255,255,0.10)",
+                backdropFilter: "blur(10px)",
+                textAlign: "center",
+              }}
+            >
+              <Typography variant="h6" sx={{ fontWeight: 800, color: "#fff" }}>
                 No Jobs Found
-              </h1>
-              <p className="text-sm text-gray-500">
+              </Typography>
+              <Typography variant="body2" sx={{ mt: 1, color: "rgba(255,255,255,0.75)" }}>
                 Try checking back later or explore other categories.
-              </p>
-            </div>
+              </Typography>
+            </Box>
           ) : (
-            allJobs?.slice(0, 6).map((job: any) => (
-              <JobCard
+            allJobs?.slice(0, 6).map((job: any, idx: number) => (
+              <motion.div
                 key={job._id}
-                job={job}
-                onSelect={(id: string) => navigate(`/jobs?jobId=${id}`)}
-              />
+                initial={{ opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: idx * 0.04 }}
+              >
+                <JobCard job={job} onSelect={(id: string) => navigate(`/jobs?jobId=${id}`)} />
+              </motion.div>
             ))
           )}
-        </div>
-      </div>
-    </section>
+        </Box>
+      </Container>
+    </Box>
   );
 }
 

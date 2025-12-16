@@ -1,15 +1,25 @@
-import { Button } from './ui/button';
 import { Bookmark } from 'lucide-react';
-import { Avatar, AvatarImage } from './ui/avatar';
-import { Badge } from './ui/badge';
 import { useNavigate } from 'react-router-dom';
+import {
+  Avatar,
+  Box,
+  Card,
+  CardActionArea,
+  CardContent,
+  Chip,
+  IconButton,
+  Stack,
+  Typography,
+} from '@mui/material';
 
 function highlightText(text: string, search: string) {
   if (!search) return text;
   const regex = new RegExp(`(${search})`, 'gi');
   return text.split(regex).map((part, i) =>
     regex.test(part) ? (
-      <span key={i} className="bg-yellow-200 text-black">{part}</span>
+      <Box key={i} component="span" sx={{ backgroundColor: '#FFF59D', color: '#000' }}>
+        {part}
+      </Box>
     ) : (
       part
     )
@@ -45,63 +55,80 @@ const JobCard = ({ job, searchTerm, onSelect, selected }: any) => {
 
   const daysAgo = daysAgoFunction(job?.createdAt);
   return (
-    <div
-      onClick={() => {
-        if (typeof onSelect === "function") {
-          onSelect(job?._id);
-        } else {
-          navigate(`/description/${job._id}`);
-        }
+    <Card
+      variant="outlined"
+      sx={{
+        borderRadius: 2,
+        borderColor: selected ? 'primary.main' : 'divider',
+        boxShadow: selected ? 2 : 0,
+        transition: 'transform 150ms ease, box-shadow 150ms ease',
+        '&:hover': { transform: selected ? 'none' : 'translateY(-1px)', boxShadow: 2 },
       }}
-      className={`p-6 rounded-xl shadow-lg bg-white border hover:shadow-lg transition-all duration-300 transform m-4 sm:m-0 cursor-pointer ${
-        selected ? "border-blue-500 ring-2 ring-blue-100" : "border-gray-300 hover:scale-[1.03]"
-      }`}
     >
-      <div className="flex items-center justify-between mb-4 m-2">
-        <p className="text-sm text-gray-500">
-          {
-            daysAgo === null
-              ? ""
-              : daysAgo === 0
-                ? "Today"
-                : daysAgo === 1
-                  ? "1 day ago"
-                  : `${daysAgo} days ago`
+      <CardActionArea
+        onClick={() => {
+          if (typeof onSelect === "function") {
+            onSelect(job?._id);
+          } else {
+            navigate(`/description/${job._id}`);
           }
-        </p>
-        <Button variant="outline" size="icon" className="rounded-full">
-          <Bookmark className="w-4 h-4" />
-        </Button>
-      </div>
+        }}
+        sx={{ alignItems: 'stretch' }}
+      >
+        <CardContent>
+          <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
+            <Typography variant="caption" color="text.secondary">
+              {daysAgo === null
+                ? ""
+                : daysAgo === 0
+                  ? "Today"
+                  : daysAgo === 1
+                    ? "1 day ago"
+                    : `${daysAgo} days ago`}
+            </Typography>
+            <IconButton size="small" aria-label="bookmark" onClick={(e) => e.stopPropagation()}>
+              <Bookmark size={18} />
+            </IconButton>
+          </Stack>
 
-      <div className="flex items-center gap-4 mb-4">
-        <Avatar className="w-12 h-12">
-          <AvatarImage src={job?.company?.logo || "https://via.placeholder.com/48"} />
-        </Avatar>
-        <div>
-          <h2 className="font-semibold text-gray-800 text-base">{job?.company?.name}</h2>
-          <p className="text-sm text-gray-500">{job?.location}</p>
-        </div>
-      </div>
+          <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 2 }}>
+            <Avatar
+              src={job?.company?.logo || "https://via.placeholder.com/48"}
+              alt={job?.company?.name}
+              sx={{ width: 40, height: 40 }}
+            />
+            <Box>
+              <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                {job?.company?.name}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {job?.location}
+              </Typography>
+            </Box>
+          </Stack>
 
-      <div className="mb-4">
-        <h3 className="text-lg font-bold text-gray-800 w-full">
-          {highlightText(job?.title, searchTerm)}
-        </h3>
-        <p className="text-sm text-gray-600 mt-1">
-          {highlightText(job?.description, searchTerm)}
-        </p>
-      </div>
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 800, lineHeight: 1.25 }}>
+              {highlightText(job?.title, searchTerm)}
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+              {highlightText(job?.description, searchTerm)}
+            </Typography>
+          </Box>
 
-      <div className="flex flex-wrap gap-2 mt-2">
-        <Badge className="text-white font-medium border-primary bg-white text-primary">
-          Experience: {typeof job?.experience === "number" && job.experience >= 0 ? job.experience : "0"}
-        </Badge>
-        <Badge className="text-white font-medium border-primary bg-white text-primary"> Position: {job?.position}</Badge>
-        <Badge className="text-white font-medium border-primary bg-white text-primary">{job?.jobType}</Badge>
-        <Badge className="text-white font-medium border-primary bg-white text-primary">{formatSalaryRange(job)}</Badge>
-      </div>
-    </div>
+          <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+            <Chip
+              size="small"
+              label={`Experience: ${typeof job?.experience === "number" && job.experience >= 0 ? job.experience : "0"}`}
+              variant="outlined"
+            />
+            <Chip size="small" label={`Position: ${job?.position ?? ""}`} variant="outlined" />
+            <Chip size="small" label={`${job?.jobType ?? ""}`} variant="outlined" />
+            <Chip size="small" label={formatSalaryRange(job)} variant="outlined" />
+          </Stack>
+        </CardContent>
+      </CardActionArea>
+    </Card>
   );
 };
 

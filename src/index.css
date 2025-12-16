@@ -8,7 +8,8 @@
 .bg-secondary { background-color: #3B82F6; }
 .bg-muted { background-color: #DBEAFE; }
 .bg-primaryBg { background-color: #F9FAFB; }
-.bgMain-gradient { background: linear-gradient(to right, #2e4b9c, #4a82fa); }
+.bgMain-gradient { background: linear-gradient(135deg, rgba(59,130,246,0.55), rgba(99,102,241,0.45), rgba(236,72,153,0.35)); }
+.bg-landing { background: radial-gradient(1100px circle at 15% -10%, rgba(59,130,246,0.70), transparent 55%), radial-gradient(900px circle at 95% 10%, rgba(99,102,241,0.65), transparent 50%), radial-gradient(900px circle at 40% 95%, rgba(34,211,238,0.50), transparent 55%), linear-gradient(135deg, #0B102F 0%, #0B2B6B 32%, #1D4ED8 62%, #0EA5E9 100%); }
 .border-primary { border-color: #BFDBFE; }
 .border-secondary { border-color: #93C5FD; }
 .bg-footer {  background: linear-gradient(to right, #163382, #1b4bb1);}
@@ -31,3 +32,12 @@
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;     /* Firefox */
 }
+
+@keyframes float-slow {
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(0, -18px, 0) scale(1.03); }
+  100% { transform: translate3d(0, 0, 0) scale(1); }
+}
+
+.float-slow { animation: float-slow 9s ease-in-out infinite; }
+.float-slow-delay { animation: float-slow 11s ease-in-out infinite; animation-delay: -2s; }

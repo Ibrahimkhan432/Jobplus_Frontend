@@ -1,4 +1,13 @@
 import { useState } from "react";
+import {
+  Box,
+  Divider,
+  FormControlLabel,
+  Paper,
+  Radio,
+  Stack,
+  Typography,
+} from "@mui/material";
 
 const filterData = [
   {
@@ -53,36 +62,43 @@ function FilterCard({ onFilterChange }: FilterCardProps) {
   };
 
   return (
-    <div className="border border-gray-300 rounded-lg shadow-md overflow-hidden">
-      <div className="h-2 w-full bgMain-gradient" />
-      <div className="p-4">
-        <h2 className="text-xl font-bold text-gray-800 mb-2">Filter Jobs</h2>
-        <hr className="mb-4" />
-        {filterData.map((data, index) => (
-          <div key={index} className="mb-6">
-            <h3 className="font-semibold text-lg text-gray-700 mb-2">{data.filterType}</h3>
-            <div className="flex flex-col gap-2">
-              {data.array.map((item, idx) => (
-                <div key={idx} className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    name={data.filterType}
-                    id={`${data.filterType}-${item}`}
-                    checked={selectedFilters[data.filterType] === item}
-                    onClick={() => handleRadioClick(data.filterType, item)}
-                    readOnly
-                    className="cursor-pointer"
+    <Paper variant="outlined" sx={{ overflow: "hidden", borderRadius: 2 }}>
+      <Box className="bgMain-gradient" sx={{ height: 6, width: "100%" }} />
+      <Box sx={{ p: 2 }}>
+        <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
+          Filter Jobs
+        </Typography>
+        <Divider sx={{ mb: 2 }} />
+
+        <Stack spacing={2.5}>
+          {filterData.map((data, index) => (
+            <Box key={index}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1 }}>
+                {data.filterType}
+              </Typography>
+              <Stack spacing={0.5}>
+                {data.array.map((item, idx) => (
+                  <FormControlLabel
+                    key={idx}
+                    control={
+                      <Radio
+                        checked={selectedFilters[data.filterType] === item}
+                        onClick={() => handleRadioClick(data.filterType, item)}
+                      />
+                    }
+                    label={
+                      <Typography variant="body2" color="text.secondary">
+                        {item}
+                      </Typography>
+                    }
                   />
-                  <label htmlFor={`${data.filterType}-${item}`} className="text-sm text-gray-700 cursor-pointer">
-                    {item}
-                  </label>
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
+                ))}
+              </Stack>
+            </Box>
+          ))}
+        </Stack>
+      </Box>
+    </Paper>
   );
 }
 

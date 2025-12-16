@@ -8,6 +8,8 @@ import { setAllApplicants } from "../../../redux/applicationSlice";
 import axiosInstance from "@/utils/axios";
 import ApplicantsTable from "@/components/recruiter/ApplicantsTable";
 
+import { Box, Container, IconButton, Stack, Typography } from "@mui/material";
+
 const JobApplicants = () => {
   const params = useParams();
   const navigate = useNavigate();
@@ -40,38 +42,37 @@ const JobApplicants = () => {
 
   if (loading) {
     return (
-      <div>
-        <div className="bgMain-gradient">
-          <Navbar />
-        </div>
-        <div className="max-w-7xl mx-auto mt-10 px-4 sm:px-6 lg:px-8">
-          <div className="text-center">Loading...</div>
-        </div>
-      </div>
+      <Box>
+        <Navbar />
+        <Container maxWidth="lg" sx={{ py: 4 }}>
+          <Typography variant="body2" color="text.secondary" align="center">
+            Loading...
+          </Typography>
+        </Container>
+      </Box>
     );
   }
 
   return (
-    <div>
-      <div className="bgMain-gradient">
-        <Navbar />
-      </div>
-      <div className="max-w-7xl mx-auto mt-10 px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center gap-2 mb-6">
-          <ArrowLeft
-            className="cursor-pointer"
-            onClick={() => navigate("/recruiter/dashboard")}
-          />
-          <h1 className="text-2xl font-bold text-black">
-            Applicants for {jobTitle}
-            <span className="ml-2 text-blue-800">( {applicants?.applications?.length} )</span>
-          </h1>
-        </div>
+    <Box>
+      <Navbar />
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
+          <IconButton onClick={() => navigate("/recruiter/dashboard")}>
+            <ArrowLeft />
+          </IconButton>
+          <Typography variant="h5" sx={{ fontWeight: 700 }}>
+            Applicants for {jobTitle}{" "}
+            <Typography component="span" variant="h6" sx={{ color: "primary.main", fontWeight: 700 }}>
+              ( {applicants?.applications?.length ?? 0} )
+            </Typography>
+          </Typography>
+        </Stack>
 
         <ApplicantsTable />
-      </div>
-    </div>
+      </Container>
+    </Box>
   );
 };
 
-export default JobApplicants; 
+export default JobApplicants;

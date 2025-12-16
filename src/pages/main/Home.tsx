@@ -20,8 +20,8 @@ export default function Home() {
 
   useGetAllJobs();
   return (
-    <div>
-      <Navbar />
+    <div className="bg-landing min-h-screen">
+      <Navbar variant="landing" />
       <Hero />
       <LatestJobs />
       <Footer />

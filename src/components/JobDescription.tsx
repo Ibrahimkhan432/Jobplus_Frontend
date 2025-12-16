@@ -1,12 +1,12 @@
 "use client"
 import { useParams } from "react-router-dom"
-import { Badge } from "./ui/badge"
-import { Button } from "./ui/button"
 import { useEffect, useRef, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { setSingleJob } from "../../redux/jobSlice"
 import axiosInstance from "@/utils/axios"
 import ApplyFlowDialog from "@/components/ApplyFlowDialog"
+import Navbar from "@/components/global/Navbar";
+import { Alert, Box, Button, Chip, Container, Grid, Paper, Stack, Typography } from "@mui/material"
 import {
   MapPinIcon,
   CalendarIcon,
@@ -126,183 +126,166 @@ function JobDescription() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-gray-500">Loading job details...</div>
-      </div>
+      <Box sx={{ minHeight: "70vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <Typography variant="body2" color="text.secondary">
+          Loading job details...
+        </Typography>
+      </Box>
     )
   }
 
   if (loadError) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen gap-4 px-4">
-        <div className="text-red-600">{loadError}</div>
-        <Button onClick={() => window.location.reload()} variant="outline">
+      <Box sx={{ minHeight: "70vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2, px: 2 }}>
+        <Alert severity="error">{loadError}</Alert>
+        <Button onClick={() => window.location.reload()} variant="outlined">
           Retry
         </Button>
-      </div>
+      </Box>
     )
   }
 
   if (!singleJob) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-gray-500">Job not found</div>
-      </div>
+      <Box sx={{ minHeight: "70vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <Typography variant="body2" color="text.secondary">
+          Job not found
+        </Typography>
+      </Box>
     )
   }
 
   return (
-    <div
-      ref={formaRef}
-      className="min-h-screen bg-gray-50 py-4">
-      <div className="max-w-4xl mx-auto px-4 space-y-2">
-        {/* Header Card */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
-          <div className="flex flex-col lg:flex-row items-start justify-between gap-6">
-            <div className="flex-1">
-              <div className="flex items-start gap-4 mb-4">
-                <div className="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center">
-                  <BriefcaseIcon className="h-8 w-8 text-blue-600" />
-                </div>
-                <div>
-                  <h1 className="text-3xl font-bold text-gray-900 mb-2">{singleJob?.title}</h1>
-                  <div className="flex items-center text-gray-600 mb-3">
-                    <MapPinIcon className="h-5 w-5 mr-2" />
-                    <span className="text-lg">{singleJob?.location}</span>
-                  </div>
-                  {singleJob?.created_by?.email ? (
-                    <div className="flex items-center text-gray-600 mb-3">
-                      <MailIcon className="h-5 w-5 mr-2" />
-                      <span className="text-lg font-medium mr-2">Email:</span>
-                      <span className="text-lg">{singleJob.created_by.email}</span>
-                    </div>
-                  ) : null}
-                </div>
-              </div>
+    <Box ref={formaRef}>
+      <Navbar />
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Grid container spacing={3}>
+          <Grid size={{ xs: 12, md: 8 }}>
+            <Stack spacing={2.5}>
+              <Paper variant="outlined" sx={{ p: { xs: 2, sm: 3 }, borderRadius: 2 }}>
+                <Stack direction="row" spacing={2} alignItems="flex-start">
+                  <Box sx={{ width: 56, height: 56, borderRadius: 2, backgroundColor: "primary.50", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <BriefcaseIcon size={28} />
+                  </Box>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="h4" sx={{ fontWeight: 900, lineHeight: 1.1 }}>
+                      {singleJob?.title}
+                    </Typography>
+                    <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 1 }}>
+                      <MapPinIcon size={18} />
+                      <Typography variant="body2" color="text.secondary">
+                        {singleJob?.location}
+                      </Typography>
+                    </Stack>
+                    {singleJob?.created_by?.email ? (
+                      <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 1 }}>
+                        <MailIcon size={18} />
+                        <Typography variant="body2" color="text.secondary">
+                          {singleJob.created_by.email}
+                        </Typography>
+                      </Stack>
+                    ) : null}
 
-              <div className="flex flex-wrap gap-3">
-                <Badge variant="secondary" className="px-3 py-1 text-sm font-medium text-white">
-                  <ClockIcon className="h-4 w-4 mr-1 " />
-                  {singleJob?.experience} years exp
-                </Badge>
-                <Badge variant="outline" className="px-3 py-1 text-sm font-medium">
-                  <UsersIcon className="h-4 w-4 mr-1" />
-                  {singleJob?.position} positions
-                </Badge>
-                <Badge variant="secondary" className="px-3 py-1 text-sm font-medium  text-white">
-                  {formatSalary(singleJob?.salary)}
-                </Badge>
-                <Badge variant="outline" className="px-3 py-1 text-sm font-medium cursor-pointer">
-                  <BuildingIcon className="h-4 w-4 mr-1 " />
-                  {singleJob?.jobType}
-                </Badge>
-              </div>
-            </div>
+                    <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" sx={{ mt: 2 }}>
+                      <Chip icon={<ClockIcon size={16} />} label={`${singleJob?.experience} years exp`} variant="outlined" />
+                      <Chip icon={<UsersIcon size={16} />} label={`${singleJob?.position} positions`} variant="outlined" />
+                      <Chip label={formatSalary(singleJob?.salary)} variant="outlined" />
+                      <Chip icon={<BuildingIcon size={16} />} label={`${singleJob?.jobType}`} variant="outlined" />
+                    </Stack>
+                  </Box>
+                </Stack>
+              </Paper>
 
-            <div className="flex flex-col items-end gap-4 cursor-pointer">
-              {!jobId ? (
-                <Button disabled size="lg" className="px-8 py-3 text-lg font-semibold text-white bgMain-gradient cursor-not-allowed">
-                  Apply Now
-                </Button>
-              ) : isApplied ? (
-                <Button disabled size="lg" className="px-8 py-3 text-lg font-semibold text-white bgMain-gradient cursor-not-allowed">
-                  <CheckCircleIcon className="h-5 w-5 mr-2" />
-                  Applied
-                </Button>
-              ) : (
-                <ApplyFlowDialog
-                  jobId={jobId}
-                  onApplied={refetchSingleJob}
-                  trigger={
-                    <Button
-                      size="lg"
-                      className="px-8 py-3 text-lg font-semibold text-white bgMain-gradient hover:bg-blue-700"
-                    >
+              <Paper variant="outlined" sx={{ p: { xs: 2, sm: 3 }, borderRadius: 2 }}>
+                <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+                  <FileTextIcon size={20} />
+                  <Typography variant="h6" sx={{ fontWeight: 800 }}>
+                    Job Description
+                  </Typography>
+                </Stack>
+                <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: "pre-wrap" }}>
+                  {singleJob?.description}
+                </Typography>
+              </Paper>
+
+              {singleJob?.requirement ? (
+                <Paper variant="outlined" sx={{ p: { xs: 2, sm: 3 }, borderRadius: 2 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 800, mb: 1 }}>
+                    Requirements
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: "pre-wrap" }}>
+                    {singleJob?.requirement}
+                  </Typography>
+                </Paper>
+              ) : null}
+            </Stack>
+          </Grid>
+
+          <Grid size={{ xs: 12, md: 4 }}>
+            <Box sx={{ position: { md: "sticky" }, top: { md: 88 } }}>
+              <Stack spacing={2.5}>
+                <Paper variant="outlined" sx={{ p: { xs: 2, sm: 3 }, borderRadius: 2 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 800, mb: 2 }}>
+                    Apply
+                  </Typography>
+                  {!jobId ? (
+                    <Button fullWidth disabled variant="contained" size="large">
                       Apply Now
                     </Button>
-                  }
-                />
-              )}
-            </div>
-          </div>
-        </div>
+                  ) : isApplied ? (
+                    <Button fullWidth disabled variant="contained" size="large" startIcon={<CheckCircleIcon size={18} />}>
+                      Applied
+                    </Button>
+                  ) : (
+                    <ApplyFlowDialog
+                      jobId={jobId}
+                      onApplied={refetchSingleJob}
+                      trigger={
+                        <Button fullWidth variant="contained" size="large">
+                          Apply Now
+                        </Button>
+                      }
+                    />
+                  )}
 
-        {/* Stats Card */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-2">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                <UsersIcon className="h-6 w-6 text-purple-600" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Total Applicants</p>
-                <p className="text-2xl font-bold text-gray-900">{singleJob?.applications?.length || 0}</p>
-              </div>
-            </div>
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+                    You will be notified when the recruiter updates your application status.
+                  </Typography>
+                </Paper>
 
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <CalendarIcon className="h-6 w-6 text-green-600" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Posted Date</p>
-                <p className="text-lg font-semibold text-gray-900">{formatDate(singleJob?.createdAt)}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Job Description Card */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
-          <div className="flex items-center gap-3 mb-2">
-            <FileTextIcon className="h-6 w-6 text-blue-600" />
-            <h2 className="text-2xl font-bold text-gray-900">Job Description</h2>
-          </div>
-
-          <div className="prose max-w-none">
-            <div className="mb-8">
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">About this role</h3>
-              <p className="text-gray-600 leading-relaxed text-base">{singleJob?.description}</p>
-            </div>
-
-            {singleJob?.requirement && (
-              <div className="mb-2">
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">Requirements</h3>
-                <p className="text-gray-600 leading-relaxed text-base">{singleJob?.requirement}</p>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Apply Again Section */}
-        <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl border border-blue-200 p-8 text-center">
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">Ready to join our team?</h3>
-          <p className="text-gray-600 mb-6">
-            Take the next step in your career and apply for this exciting opportunity.
-          </p>
-          {!jobId ? (
-            <Button disabled size="lg" className="px-8 py-3 text-lg font-semibold text-white bgMain-gradient cursor-not-allowed">
-              Apply for this Position
-            </Button>
-          ) : isApplied ? (
-            <Button disabled size="lg" className="px-8 py-3 text-lg font-semibold text-white bgMain-gradient cursor-not-allowed">
-              <CheckCircleIcon className="h-5 w-5 mr-2" />
-              Application Submitted
-            </Button>
-          ) : (
-            <ApplyFlowDialog
-              jobId={jobId}
-              onApplied={refetchSingleJob}
-              trigger={
-                <Button size="lg" className="px-8 py-3 text-lg font-semibold text-white bgMain-gradient hover:bg-blue-700">
-                  Apply for this Position
-                </Button>
-              }
-            />
-          )}
-        </div>
-      </div>
-    </div>
+                <Paper variant="outlined" sx={{ p: { xs: 2, sm: 3 }, borderRadius: 2 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 800, mb: 2 }}>
+                    Overview
+                  </Typography>
+                  <Stack spacing={1.25}>
+                    <Stack direction="row" spacing={1.5} alignItems="center">
+                      <UsersIcon size={18} />
+                      <Typography variant="body2" color="text.secondary">
+                        Total applicants
+                      </Typography>
+                      <Box sx={{ flex: 1 }} />
+                      <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
+                        {singleJob?.applications?.length || 0}
+                      </Typography>
+                    </Stack>
+                    <Stack direction="row" spacing={1.5} alignItems="center">
+                      <CalendarIcon size={18} />
+                      <Typography variant="body2" color="text.secondary">
+                        Posted
+                      </Typography>
+                      <Box sx={{ flex: 1 }} />
+                      <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
+                        {formatDate(singleJob?.createdAt)}
+                      </Typography>
+                    </Stack>
+                  </Stack>
+                </Paper>
+              </Stack>
+            </Box>
+          </Grid>
+        </Grid>
+      </Container>
+    </Box>
   )
 }
 

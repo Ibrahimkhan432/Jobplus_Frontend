@@ -1,29 +1,86 @@
 "use client";
 
-import { useState, } from "react";
-import { User, LogOut, Menu, Bell } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { User, LogOut, Menu as MenuIcon, Bell } from "lucide-react";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
 import { setUser } from "../../../redux/authSlice"
 import axiosInstance from "@/utils/axios";
-export default function Navbar() {
+import {
+  markAllReadLocal,
+  markNotificationReadLocal,
+  setNotificationLoading,
+  setNotifications,
+  setUnreadCount,
+} from "../../../redux/notificationSlice";
+
+import {
+  AppBar,
+  Avatar,
+  Badge,
+  Box,
+  Button,
+  Container,
+  Divider,
+  Drawer,
+  IconButton,
+  List,
+  ListItemButton,
+  ListItemText,
+  Menu,
+  MenuItem,
+  Toolbar,
+  Typography,
+} from "@mui/material";
+
+type NavbarVariant = "default" | "landing";
+
+export default function Navbar({ variant = "default" }: { variant?: NavbarVariant }) {
   const { user } = useSelector((store: any) => store.auth);
+  const { notifications, unreadCount } = useSelector((store: any) => store.notification);
   const [isOpen, setIsOpen] = useState(false);
+  const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(null);
+  const [notificationAnchor, setNotificationAnchor] = useState<null | HTMLElement>(null);
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
+  const pollRef = useRef<number | null>(null);
+
+  const isRecruiter = useMemo(() => user?.role === "recruiter", [user?.role]);
+  const isLanding = variant === "landing";
+
+  const fetchNotifications = async () => {
+    if (!user?._id) return;
+    try {
+      dispatch(setNotificationLoading(true));
+      const res = await axiosInstance.get("/notification/get", { withCredentials: true });
+      if (res.data?.success) {
+        dispatch(setNotifications(res.data.notifications || []));
+        dispatch(setUnreadCount(res.data.unreadCount ?? 0));
+      }
+    } catch {
+      // ignore
+    } finally {
+      dispatch(setNotificationLoading(false));
+    }
+  };
+
+  useEffect(() => {
+    if (!user?._id) return;
+    // initial fetch
+    fetchNotifications();
+    // poll every 30s
+    pollRef.current = window.setInterval(fetchNotifications, 30000);
+    return () => {
+      if (pollRef.current) window.clearInterval(pollRef.current);
+    };
+  }, [user?._id]);
 
   const handleLogout = async () => {
 
     try {
-      const res = await axiosInstance.get(`/user/Logout`, {
+      const res = await axiosInstance.get(`/user/logout`, {
         withCredentials: true,
       });
       if (res.data.success) {
@@ -38,283 +95,282 @@ export default function Navbar() {
   };
 
   return (
-    <nav
-      className="sticky  z-50 transition-all bgMain-gradient mb-4 duration-300 bg-transparent"
+    <AppBar
+      position="sticky"
+      sx={{
+        boxShadow: "none",
+        backgroundColor: "transparent",
+        color: isLanding ? "#fff" : "text.primary",
+        backdropFilter: "none",
+        borderBottom: "none",
+      }}
     >
-      <div className="flex h-16 items-center lg:px-30 md:px-20 container mx-auto">
-        <div className="flex items-center mr-6">
-          <Link to="/" className="flex items-center gap-2">
-            <div
-              className={`bgMain-gradient p-2 rounded-lg shadow-md`}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="white"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-5 w-5"
-              >
-                <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
-                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
-              </svg>
-            </div>
-            <div className="flex flex-col ">
-              <span
-                className={`text-xl font-extrabold w-[90px] text-white`}
-              >
-                Job Plus
-              </span>
-              <span
-                className={`text-xs font-medium -mt-1 text-white`}
-              >
-                Find Your Dream Career
-              </span>
-            </div>
-          </Link>
-        </div>
-
-        <div className="hidden md:flex items-center space-x-1 mx-auto text-md">
-
-          {user?.role === "recruiter" ? (
-            <>
-              <Link
-                to="/recruiter/dashboard"
-                className="px-4 py-2 rounded-md text-sm font-medium transition-colors hover:bg-white/20 hover:text-white text-white"
-              >
-                My Companies
-              </Link>
-              <Link
-                to="/recruiter/dashboard"
-                className="px-4 py-2 rounded-md text-md font-medium transition-colors hover:bg-white/20 hover:text-white text-white"
-              >
-                My Jobs
-              </Link>
-            </>
-          ) : (
-            <>
-              <Link
-                to="/"
-                className="px-4 py-2 rounded-md text-md font-medium transition-colors hover:bg-white/20 hover:text-white text-white"
-              >
-                Home
-              </Link>
-              <Link
-                to="/jobs"
-                className="px-4 py-2 rounded-md text-md font-medium transition-colors hover:bg-white/20 hover:text-white text-white"
-              >
-                Jobs
-              </Link>
-              <Link
-                to="/browser"
-                className="px-4 py-2 rounded-md text-md font-medium transition-colors hover:bg-white/20 hover:text-white text-white"
-              >
-                Browser
-              </Link>
-            </>
-          )}
-        </div>
-
-        <div className="flex-1 md:flex-none md:w-auto flex justify-end md:justify-start ml-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-white hover:bg-white/20"
-          >
-          </Button>
-        </div>
-
-        <div className="flex items-center ml-auto gap-2 md:flex">
-          {user ? (
-            <>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-white hover:bg-white/20"
-              >
-                <Bell className="h-5 w-5" />
-              </Button>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    className="relative h-10 w-10 rounded-full p-0 overflow-hidden border-2 border-white/30 hover:border-white/60"
-                  >
-                    <Avatar className="h-full w-full cursor-pointer">
-                      <AvatarImage
-                        src={user.profile || "/placeholder.svg"}
-                        alt={user.fullName}
-                      />
-                      <AvatarFallback className="bg-blue-100 text-blue-700">
-                        {user.fullName?.[0] ?? "U"}
-                      </AvatarFallback>
-                    </Avatar>
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent
-                  className="w-64 p-0 overflow-hidden border-2 border-blue-100"
-                  align="end"
-                >
-                  <div className="bgMain-gradient p-4">
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-12 w-12 border-2 border-white">
-                        <AvatarImage
-                          src={user.profile || "/placeholder.svg"}
-                          alt={user.fullName}
-                        />
-                        <AvatarFallback className="bg-white text-blue-700">
-                          {user.fullName?.[0] ?? "U"}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex flex-col">
-                        <span className="text-sm font-bold text-white">
-                          {user.fullName.toUpperCase()}
-                        </span>
-                        <span className="text-xs text-blue-100">
-                          {
-                            user?.profile?.bio
-                          }                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="p-3 bg-white">
-                    <div className="flex flex-col gap-2">
-                      <Link to="/profile">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="justify-start w-full hover:bg-blue-50 hover:text-blue-600 cursor-pointer"
-                        >
-                          <User className="mr-2 h-4 w-4" />
-                          Profile
-                        </Button>
-                      </Link>
-                      <Button
-                        onClick={handleLogout}
-                        variant="ghost"
-                        size="sm"
-                        className="justify-start w-full hover:bg-blue-50 hover:text-blue-600 cursor-pointer"
-                      >
-                        <LogOut
-                          className="mr-2 h-4 w-4"
-                        />
-                        Logout
-                      </Button>
-                    </div>
-                  </div>
-                </PopoverContent>
-              </Popover>
-            </>
-          ) : (
-            <>
-              <Link to="/login">
-                <Button
-                  variant="ghost"
-                  className="cursor-pointer text-white md:flex hidden"
-                >
-                  Login
-                </Button>
-              </Link>
-              <Link to="/signup">
-                <Button
-                  variant="ghost"
-                  className="px-3 py-2d text-sm font-medium  text-white cursor-pointer md:flex hidden"
-                >
-                  Join Now
-                </Button>
-              </Link>
-            </>
-          )}
-        </div>
-
-        {/* Mobile menu button */}
-        <div className="md:hidden ml-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-base text-white"
-            onClick={() => setIsOpen(!isOpen)}
-          >
-            <span className="sr-only">Open menu</span>
-            <Menu className="h-10 w-10" />
-          </Button>
-        </div>
-      </div>
-
-      {/* Mobile menu */}
-      {isOpen && (
-        <div
-          className="md:hidden px-4 pb-4 pt-2 border-t bg-white/10 backdrop-blur-md"
+      <Container maxWidth={false} sx={{ pt: 1.25, pb: 1.25, px: 0 }}>
+        <Box
+          sx={{
+            width: "100%",
+            maxWidth: 1320,
+            marginLeft: { xs: 2, sm: 6, md: 9 },
+            marginRight: { xs: 3, sm: 6, md: 9 },
+            paddingLeft: { xs: 2, sm: 3, md: 4 },
+            paddingRight: { xs: 2, sm: 3, md: 4 },
+            paddingTop: { xs: 0.1, sm: 0.2 },
+            paddingBottom: { xs: 0.1, sm: 0.2 },
+            borderRadius: 999,
+            backgroundColor: isLanding ? "rgba(11,16,47,0.30)" : "rgba(255,255,255,0.85)",
+            backdropFilter: "blur(12px)",
+            border: isLanding ? "1px solid rgba(255,255,255,0.16)" : "1px solid rgba(0,0,0,0.06)",
+            boxShadow: isLanding ? "0 14px 40px rgba(0,0,0,0.32)" : "0 14px 40px rgba(15,23,42,0.12)",
+          }}
         >
-          <div className="flex flex-col space-y-2">
-            <Link
-              to="/"
-              className="px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-white/20 text-white"
-              onClick={() => setIsOpen(false)}
-            >
-              Home
-            </Link>
-            {user?.role === "recruiter" ? (
+          <Toolbar disableGutters sx={{ minHeight: 64 }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <Button
+                component={RouterLink}
+                to="/"
+                color="inherit"
+                sx={{ textTransform: "none", p: 0, minWidth: 0 }}
+              >
+                <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
+                  <Typography variant="h6" sx={{ fontWeight: 900, lineHeight: 1 }}>
+                    Job Plus
+                  </Typography>
+                  <Typography variant="caption" sx={{ opacity: 0.75, color: isLanding ? "rgba(255,255,255,0.85)" : undefined }}>
+                    Find Your Dream Career
+                  </Typography>
+                </Box>
+              </Button>
+            </Box>
+
+          <Box sx={{ display: { xs: "none", md: "flex" }, gap: 1, flex: 1, justifyContent: "center" }}>
+            {isRecruiter ? (
               <>
-                <Link
-                  to="recruiter/dashboard"
-                  className="px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-white/20 text-white"
-                  onClick={() => setIsOpen(false)}
+                <Button
+                  component={RouterLink}
+                  to="/recruiter/dashboard"
+                  color="inherit"
+                  sx={{ textTransform: "none" }}
                 >
-                  Companies
-                </Link>
-                <Link
-                  to="/admin/jobs"
-                  className="px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-white/20 text-white"
-                  onClick={() => setIsOpen(false)}
+                  My Companies
+                </Button>
+                <Button
+                  component={RouterLink}
+                  to="/recruiter/dashboard"
+                  color="inherit"
+                  sx={{ textTransform: "none" }}
                 >
-                  Jobs
-                </Link>
+                  My Jobs
+                </Button>
               </>
             ) : (
               <>
-                <Link
-                  to="/jobs"
-                  className="px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-white/20 text-white"
-                  onClick={() => setIsOpen(false)}
-                >
+                <Button component={RouterLink} to="/" color="inherit" sx={{ textTransform: "none" }}>
+                  Home
+                </Button>
+                <Button component={RouterLink} to="/jobs" color="inherit" sx={{ textTransform: "none" }}>
                   Jobs
-                </Link>
-                <Link
-                  to="/browser"
-                  className="px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-white/20 text-white"
-                  onClick={() => setIsOpen(false)}
-                >
+                </Button>
+                <Button component={RouterLink} to="/browser" color="inherit" sx={{ textTransform: "none" }}>
                   Browser
-                </Link>
+                </Button>
               </>
             )}
-            {!user && (
-              <div
-                className="pt-2 mt-2 border-t border-white/10 flex flex-col space-y-2"
-              >
-                <Link
-                  to="/login"
-                  className="px-3 py-2 text-sm font-medium transition-colors hover:bg-white text-white"
-                  onClick={() => setIsOpen(false)}
+          </Box>
+
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1, ml: "auto" }}>
+            {user ? (
+              <>
+                <IconButton
+                  color="inherit"
+                  onClick={(e) => {
+                    setNotificationAnchor(e.currentTarget);
+                    fetchNotifications();
+                  }}
                 >
+                  <Badge color="error" badgeContent={unreadCount} overlap="circular">
+                    <Bell size={20} />
+                  </Badge>
+                </IconButton>
+
+                <IconButton
+                  onClick={(e) => setUserMenuAnchor(e.currentTarget)}
+                  sx={{
+                    p: 0.5,
+                    border: isLanding ? "2px solid rgba(255,255,255,0.35)" : "2px solid rgba(0,0,0,0.12)",
+                  }}
+                >
+                  <Avatar
+                    src={user.profile || "/placeholder.svg"}
+                    alt={user.fullName}
+                    sx={{ width: 32, height: 32 }}
+                  >
+                    {user.fullName?.[0] ?? "U"}
+                  </Avatar>
+                </IconButton>
+              </>
+            ) : (
+              <Box sx={{ display: { xs: "none", md: "flex" }, gap: 1 }}>
+                <Button component={RouterLink} to="/login" color="inherit" sx={{ textTransform: "none" }}>
                   Login
-                </Link>
-                <Link
-                  to="/signup"
-                  className="px-3 py-2d text-md font-medium  text-white "
-                  onClick={() => setIsOpen(false)}
-                >
-                  Join Now                </Link>
-              </div>
+                </Button>
+                <Button component={RouterLink} to="/signup" color="inherit" sx={{ textTransform: "none" }}>
+                  Join Now
+                </Button>
+              </Box>
             )}
-          </div>
-        </div>
-      )}
-    </nav>
+
+            <IconButton
+              sx={{ display: { xs: "inline-flex", md: "none" } }}
+              onClick={() => setIsOpen(true)}
+            >
+              <MenuIcon size={22} />
+            </IconButton>
+          </Box>
+        </Toolbar>
+        </Box>
+      </Container>
+
+      <Menu
+        anchorEl={userMenuAnchor}
+        open={Boolean(userMenuAnchor)}
+        onClose={() => setUserMenuAnchor(null)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        transformOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <MenuItem
+          onClick={() => {
+            setUserMenuAnchor(null);
+            navigate("/profile");
+          }}
+        >
+          <User size={16} style={{ marginRight: 8 }} />
+          Profile
+        </MenuItem>
+        <MenuItem
+          onClick={async () => {
+            setUserMenuAnchor(null);
+            await handleLogout();
+          }}
+        >
+          <LogOut size={16} style={{ marginRight: 8 }} />
+          Logout
+        </MenuItem>
+      </Menu>
+
+      <Menu
+        anchorEl={notificationAnchor}
+        open={Boolean(notificationAnchor)}
+        onClose={() => setNotificationAnchor(null)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        transformOrigin={{ vertical: "top", horizontal: "right" }}
+        PaperProps={{ sx: { width: 360, maxWidth: "90vw" } }}
+      >
+        <Box sx={{ px: 2, py: 1.5, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+            Notifications
+          </Typography>
+          <Button
+            size="small"
+            onClick={async () => {
+              try {
+                await axiosInstance.post("/notification/read-all", {}, { withCredentials: true });
+                dispatch(markAllReadLocal());
+              } catch {
+                // ignore
+              }
+            }}
+          >
+            Mark all read
+          </Button>
+        </Box>
+        <Divider />
+
+        {(!notifications || notifications.length === 0) ? (
+          <Box sx={{ p: 2 }}>
+            <Typography variant="body2" color="text.secondary">
+              No notifications yet.
+            </Typography>
+          </Box>
+        ) : (
+          notifications.slice(0, 10).map((n: any) => (
+            <MenuItem
+              key={n._id}
+              onClick={async () => {
+                try {
+                  await axiosInstance.post(`/notification/${n._id}/read`, {}, { withCredentials: true });
+                  dispatch(markNotificationReadLocal(n._id));
+                } catch {
+                  // ignore
+                }
+              }}
+              sx={{
+                whiteSpace: "normal",
+                alignItems: "flex-start",
+                gap: 1,
+                backgroundColor: n.isRead ? "transparent" : "rgba(10,102,194,0.06)",
+              }}
+            >
+              <Box sx={{ flex: 1 }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                  {n.title}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {n.message}
+                </Typography>
+              </Box>
+            </MenuItem>
+          ))
+        )}
+      </Menu>
+
+      <Drawer anchor="right" open={isOpen} onClose={() => setIsOpen(false)}>
+        <Box sx={{ width: 260 }} role="presentation">
+          <Box sx={{ p: 2 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+              Menu
+            </Typography>
+          </Box>
+          <Divider />
+          <List>
+            {isRecruiter ? (
+              <>
+                <ListItemButton component={RouterLink} to="/recruiter/dashboard" onClick={() => setIsOpen(false)}>
+                  <ListItemText primary="My Companies" />
+                </ListItemButton>
+                <ListItemButton component={RouterLink} to="/recruiter/dashboard" onClick={() => setIsOpen(false)}>
+                  <ListItemText primary="My Jobs" />
+                </ListItemButton>
+              </>
+            ) : (
+              <>
+                <ListItemButton component={RouterLink} to="/" onClick={() => setIsOpen(false)}>
+                  <ListItemText primary="Home" />
+                </ListItemButton>
+                <ListItemButton component={RouterLink} to="/jobs" onClick={() => setIsOpen(false)}>
+                  <ListItemText primary="Jobs" />
+                </ListItemButton>
+                <ListItemButton component={RouterLink} to="/browser" onClick={() => setIsOpen(false)}>
+                  <ListItemText primary="Browser" />
+                </ListItemButton>
+              </>
+            )}
+          </List>
+
+          {!user ? (
+            <>
+              <Divider />
+              <List>
+                <ListItemButton component={RouterLink} to="/login" onClick={() => setIsOpen(false)}>
+                  <ListItemText primary="Login" />
+                </ListItemButton>
+                <ListItemButton component={RouterLink} to="/signup" onClick={() => setIsOpen(false)}>
+                  <ListItemText primary="Join Now" />
+                </ListItemButton>
+              </List>
+            </>
+          ) : null}
+        </Box>
+      </Drawer>
+    </AppBar>
   );
 }

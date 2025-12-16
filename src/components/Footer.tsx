@@ -1,18 +1,25 @@
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 
 export default function Footer() {
   return (
-    <footer className="relative bgMain-gradient via-slate-800 to-slate-900 text-white overflow-hidden">
+    <footer className="relative bg-footer text-white overflow-hidden">
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute top-10 left-1/2 w-60 h-60 bg-cyan-500/5 rounded-full blur-3xl animate-pulse delay-500"></div>
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl float-slow"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl float-slow-delay"></div>
+        <div className="absolute top-10 left-1/2 w-60 h-60 bg-cyan-500/5 rounded-full blur-3xl float-slow"></div>
       </div>
 
       <div className="relative z-10 py-4 md:py-10 md:px-8 lg:px-10">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.55 }}
+            className="grid grid-cols-1 md:grid-cols-4 gap-12"
+          >
             {/* Brand Section */}
             <div className="md:col-span-1">
               <div className="flex items-center gap-3 mb-6">
@@ -173,10 +180,10 @@ export default function Footer() {
               </div>
 
             </div>
-          </div>
+          </motion.div>
 
           {/* Bottom Section */}
-          <div className="mt-4 pt-2 border-t border-gray-700/5  0">
+          <div className="mt-4 pt-2 border-t border-white/10">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4">
               <p className="text-gray-400 text-sm">
                 © {new Date().getFullYear()} Job Plus. All rights reserved.

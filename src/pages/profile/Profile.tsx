@@ -1,15 +1,25 @@
 import AppliedJobTable from "@/components/AppliedJobTable";
 import Navbar from "@/components/global/Navbar";
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Pen } from "lucide-react";
 import React from "react";
 import { useSelector, useDispatch } from "react-redux";
 import useGetAppliedJobs from "../../hooks/useGetAppliedJobs";
 import { toast } from "sonner";
 import { setUser } from "../../../redux/authSlice";
-import { Progress } from "@/components/ui/progress";
 import axiosInstance from "@/utils/axios";
+import {
+  Avatar,
+  Box,
+  Button,
+  Chip,
+  Container,
+  Divider,
+  LinearProgress,
+  Paper,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
+import { Pen } from "lucide-react";
 
 const isApplied = true;
 
@@ -70,7 +80,7 @@ function Profile() {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setForm(prev => ({ ...prev, [name]: value }));
   };
@@ -152,207 +162,221 @@ function Profile() {
   };
 
   return (
-    <div>
-      <div className="bgMain-gradient">
-        <Navbar />
-      </div>
-
-      <div className="max-w-4xl mx-auto mt-10 p-6 space-y-6">
-        {/* Profile Header */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-          <div className="flex flex-col sm:flex-row items-center gap-6">
-            <div className="relative group">
-              <Avatar className="w-24 h-24">
-                <AvatarImage
-                  src={form.profilePhoto || "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRKaiKiPcLJj7ufrj6M2KaPwyCT4lDSFA5oog&s"}
-                  alt="Profile Picture"
+    <Box>
+      <Navbar />
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Stack spacing={3}>
+          <Paper variant="outlined" sx={{ p: { xs: 2, sm: 3 }, borderRadius: 2 }}>
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={3} alignItems={{ sm: "center" }}>
+              <Box sx={{ position: "relative", width: 96, height: 96 }}>
+                <Avatar
+                  src={
+                    form.profilePhoto ||
+                    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRKaiKiPcLJj7ufrj6M2KaPwyCT4lDSFA5oog&s"
+                  }
+                  alt={user?.fullName}
+                  sx={{ width: 96, height: 96 }}
                 />
-              </Avatar>
-              {editMode && (
-                <div
-                  className="absolute inset-0 bg-black bg-opacity-40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-                  onClick={handlePhotoClick}
-                >
-                  <Pen className="text-white w-6 h-6" />
-                </div>
-              )}
-              <input
-                type="file"
-                accept="image/*"
-                ref={photoInputRef}
-                style={{ display: "none" }}
-                onChange={handlePhotoChange}
-              />
-            </div>
-            <div className="flex-1 text-center sm:text-left">
-              <h1 className="text-2xl font-semibold text-gray-900">
                 {editMode ? (
-                  <input
-                    className="border-b-2 border-gray-300 focus:border-primary outline-none text-center sm:text-left bg-transparent w-full"
-                    name="fullName"
-                    value={form.fullName}
-                    onChange={handleChange}
-                  />
-                ) : (
-                  user?.fullName
-                )}
-              </h1>
-              <p className="text-gray-600 mt-2">
-                {editMode ? (
-                  <input
-                    className="border-b-2 border-gray-300 focus:border-primary outline-none text-center sm:text-left bg-transparent w-full"
-                    name="bio"
-                    value={form.bio}
-                    onChange={handleChange}
-                    placeholder="Add a short bio"
-                  />
-                ) : (
-                  user?.profile?.bio || "No bio added"
-                )}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Profile Completion */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold">Profile Completion</h2>
-            {!editMode ? (
-              <Button
-                size="sm"
-                className="bg-primary text-white cursor-pointer"
-                onClick={() => setEditMode(true)}
-              >
-                Edit Profile
-              </Button>
-            ) : (
-              <div className="flex gap-2">
-                <Button
-                  size="sm"
-                  className="bg-primary text-white cursor-pointer"
-                  onClick={handleSave}
-                  disabled={loading}
-                >
-                  {loading ? "Saving..." : "Save Changes"}
-                </Button>
-                <Button
-                  className="text-gray-700 border-gray-300 hover:bg-gray-100 cursor-pointer"
-                  size="sm"
-                  variant="outline"
-                  onClick={handleCancel}
-                >
-                  Cancel
-                </Button>
-              </div>
-            )}
-          </div>
-
-          <div className="mb-4">
-            <div className="flex items-center justify-between mb-1">
-              <span className={`text-sm font-medium ${isProfileComplete ? 'text-green-600' : 'text-yellow-600'}`}>
-                {isProfileComplete ? 'Profile complete!' : `${completion}% complete`}
-              </span>
-              <span className="text-xs font-medium text-gray-700">{filledFields}/{totalFields} fields</span>
-            </div>
-            <div className={isProfileComplete ? 'bg-green-500 rounded-full' : 'bg-yellow-400 rounded-full'}>
-              <Progress value={completion} />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Email */}
-            <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-700">Email</label>
-              {editMode ? (
-                <input
-                  className="border px-3 py-2 rounded w-full focus:ring-primary focus:border-primary"
-                  name="email"
-                  value={form.email}
-                  onChange={handleChange}
-                />
-              ) : (
-                <p className="text-gray-900">{user?.email || "Not provided"}</p>
-              )}
-            </div>
-
-            {/* Phone */}
-            <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-700">Phone</label>
-              {editMode ? (
-                <input
-                  className="border px-3 py-2 rounded w-full focus:ring-primary focus:border-primary"
-                  name="phoneNumber"
-                  value={form.phoneNumber}
-                  onChange={handleChange}
-                />
-              ) : (
-                <p className="text-gray-900">{user?.phoneNumber || "Not provided"}</p>
-              )}
-            </div>
-
-            {/* Skills */}
-            <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-700">Skills</label>
-              {editMode ? (
-                <input
-                  className="border px-3 py-2 rounded w-full focus:ring-primary focus:border-primary"
-                  name="skills"
-                  value={form.skills}
-                  onChange={handleChange}
-                  placeholder="Comma separated skills"
-                />
-              ) : (
-                <p className="text-gray-900">
-                  {user?.profile?.skills && user.profile.skills.length > 0
-                    ? user.profile.skills.join(", ")
-                    : "No skills added"}
-                </p>
-              )}
-            </div>
-
-            {/* Resume */}
-            <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-700">Resume</label>
-              {editMode ? (
+                  <Box
+                    onClick={handlePhotoClick}
+                    sx={{
+                      position: "absolute",
+                      inset: 0,
+                      borderRadius: "50%",
+                      backgroundColor: "rgba(0,0,0,0.45)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <Pen color="#fff" size={20} />
+                  </Box>
+                ) : null}
                 <input
                   type="file"
-                  className="border px-3 py-2 rounded w-full focus:ring-primary focus:border-primary"
-                  name="file"
-                  onChange={handleFileChange}
-                  accept=".pdf,.doc,.docx"
+                  accept="image/*"
+                  ref={photoInputRef}
+                  style={{ display: "none" }}
+                  onChange={handlePhotoChange}
                 />
-              ) : (
-                user?.profile?.resume ? (
-                  <a
-                    href={user.profile.resume}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-500 hover:underline"
-                  >
-                    {user?.profile?.resumeOriginalName || "View Resume"}
-                  </a>
-                ) : (
-                  <p className="text-gray-500">No resume uploaded</p>
-                )
-              )}
-            </div>
-          </div>
-        </div>
+              </Box>
 
-        {/* Applied Jobs */}
-        {user && user.role === "student" && (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold mb-4">Applied Jobs</h2>
-            {isApplied ? (
-              <AppliedJobTable />
-            ) : (
-              <p className="text-gray-500">No applied jobs</p>
-            )}
-          </div>
-        )}
-      </div>
-    </div>
+              <Box sx={{ flex: 1 }}>
+                <Typography variant="h5" sx={{ fontWeight: 800 }}>
+                  {editMode ? (
+                    <TextField
+                      name="fullName"
+                      value={form.fullName}
+                      onChange={handleChange}
+                      size="small"
+                      fullWidth
+                    />
+                  ) : (
+                    user?.fullName
+                  )}
+                </Typography>
+                <Box sx={{ mt: 1 }}>
+                  {editMode ? (
+                    <TextField
+                      name="bio"
+                      value={form.bio}
+                      onChange={handleChange}
+                      placeholder="Add a short bio"
+                      size="small"
+                      fullWidth
+                      multiline
+                      minRows={2}
+                    />
+                  ) : (
+                    <Typography variant="body2" color="text.secondary">
+                      {user?.profile?.bio || "No bio added"}
+                    </Typography>
+                  )}
+                </Box>
+              </Box>
+
+              <Box sx={{ display: "flex", gap: 1, justifyContent: { xs: "stretch", sm: "flex-end" } }}>
+                {!editMode ? (
+                  <Button variant="contained" onClick={() => setEditMode(true)}>
+                    Edit Profile
+                  </Button>
+                ) : (
+                  <>
+                    <Button variant="contained" onClick={handleSave} disabled={loading}>
+                      {loading ? "Saving..." : "Save"}
+                    </Button>
+                    <Button variant="outlined" onClick={handleCancel}>
+                      Cancel
+                    </Button>
+                  </>
+                )}
+              </Box>
+            </Stack>
+          </Paper>
+
+          <Paper variant="outlined" sx={{ p: { xs: 2, sm: 3 }, borderRadius: 2 }}>
+            <Stack spacing={2}>
+              <Box>
+                <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 800 }}>
+                    Profile completion
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {filledFields}/{totalFields} fields
+                  </Typography>
+                </Stack>
+                <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
+                  <Typography variant="body2" color={isProfileComplete ? "success.main" : "warning.main"}>
+                    {isProfileComplete ? "Profile complete!" : `${completion}% complete`}
+                  </Typography>
+                </Stack>
+                <LinearProgress
+                  variant="determinate"
+                  value={completion}
+                  sx={{ height: 8, borderRadius: 999, backgroundColor: "rgba(0,0,0,0.08)" }}
+                />
+              </Box>
+
+              <Divider />
+
+              <Stack spacing={2}>
+                <TextField
+                  label="Email"
+                  name="email"
+                  value={editMode ? form.email : (user?.email || "")}
+                  onChange={handleChange}
+                  fullWidth
+                  size="small"
+                  InputProps={{ readOnly: !editMode }}
+                />
+                <TextField
+                  label="Phone"
+                  name="phoneNumber"
+                  value={editMode ? form.phoneNumber : (user?.phoneNumber || "")}
+                  onChange={handleChange}
+                  fullWidth
+                  size="small"
+                  InputProps={{ readOnly: !editMode }}
+                />
+
+                {editMode ? (
+                  <TextField
+                    label="Skills"
+                    name="skills"
+                    value={form.skills}
+                    onChange={handleChange}
+                    placeholder="Comma separated skills"
+                    fullWidth
+                    size="small"
+                  />
+                ) : (
+                  <Box>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>
+                      Skills
+                    </Typography>
+                    <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+                      {user?.profile?.skills && user.profile.skills.length > 0 ? (
+                        user.profile.skills.map((s: string, idx: number) => (
+                          <Chip key={`${s}-${idx}`} label={s} size="small" variant="outlined" />
+                        ))
+                      ) : (
+                        <Typography variant="body2" color="text.secondary">
+                          No skills added
+                        </Typography>
+                      )}
+                    </Stack>
+                  </Box>
+                )}
+
+                <Box>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>
+                    Resume
+                  </Typography>
+                  {editMode ? (
+                    <Button component="label" variant="outlined">
+                      Upload resume (PDF)
+                      <input type="file" hidden name="file" onChange={handleFileChange} accept=".pdf" />
+                    </Button>
+                  ) : user?.profile?.resume ? (
+                    <Button
+                      component="a"
+                      href={user.profile.resume}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      variant="text"
+                      sx={{ textTransform: "none", px: 0 }}
+                    >
+                      {user?.profile?.resumeOriginalName || "View Resume"}
+                    </Button>
+                  ) : (
+                    <Typography variant="body2" color="text.secondary">
+                      No resume uploaded
+                    </Typography>
+                  )}
+                </Box>
+              </Stack>
+            </Stack>
+          </Paper>
+
+          {user && user.role === "student" ? (
+            <Paper variant="outlined" sx={{ p: { xs: 2, sm: 3 }, borderRadius: 2 }}>
+              <Typography variant="h6" sx={{ fontWeight: 800, mb: 2 }}>
+                Applied Jobs
+              </Typography>
+              {isApplied ? (
+                <AppliedJobTable />
+              ) : (
+                <Typography variant="body2" color="text.secondary">
+                  No applied jobs
+                </Typography>
+              )}
+            </Paper>
+          ) : null}
+        </Stack>
+      </Container>
+    </Box>
   );
 }
 
