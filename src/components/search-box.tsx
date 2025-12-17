@@ -41,7 +41,7 @@ export default function SearchBox() {
         sx={{
           p: 1.25,
           borderRadius: 3,
-          backgroundColor: "rgba(255,255,255,0.75)",
+          backgroundColor: "rgb(255, 255, 255)",
           backdropFilter: "blur(10px)",
         }}
       >

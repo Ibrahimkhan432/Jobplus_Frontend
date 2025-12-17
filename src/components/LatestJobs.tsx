@@ -10,12 +10,12 @@ function LatestJobs() {
   console.log("allJobs in LatestJobs:", allJobs);
 
   return (
-    <Box component="section" sx={{ py: { xs: 6, md: 8 } }}>
+    <Box className="bg-white" component="section" sx={{ py: { xs: 6, md: 8 } }}>
       <Container maxWidth="lg">
         <motion.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>
           <Stack direction={{ xs: "column", md: "row" }} spacing={2} alignItems={{ md: "center" }} justifyContent="space-between" sx={{ mb: 4 }}>
             <Box>
-              <Typography variant="h4" sx={{ fontWeight: 900, color: "#fff" }}>
+              <Typography variant="h4" sx={{ fontWeight: 900, color: "black" }}>
                 Featured Jobs
               </Typography>
               <Typography variant="body2" sx={{ mt: 1, color: "rgba(255,255,255,0.78)" }}>

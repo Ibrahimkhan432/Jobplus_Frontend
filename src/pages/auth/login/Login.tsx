@@ -1,16 +1,21 @@
 import type React from "react";
 import { useEffect, useState } from "react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import Navbar from "../../../components/global/Navbar";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useDispatch, useSelector } from "react-redux";
 import { setLoadnig, setUser } from "./../../../../redux/authSlice";
-import { Loader } from "lucide-react";
 import axiosInstance from "../../../utils/axios";
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Container,
+  Paper,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
 
 export default function Login() {
   const [input, setInput] = useState({
@@ -26,13 +31,14 @@ export default function Login() {
 
   useEffect(() => {
     if (user && user.email) {
-      const redirectTo = (location.state as any)?.from;
-      navigate(redirectTo || "/", { replace: true });
+      const from = (location.state as any)?.from;
+      const fromPath = typeof from === "string" ? from : from?.pathname;
+      navigate(fromPath || "/", { replace: true });
     }
   }, [user, navigate, location.state]);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
     setInput((input) => ({ ...input, [name]: value }));
@@ -47,8 +53,9 @@ export default function Login() {
         localStorage.setItem("token", res.data.token)
         dispatch(setUser(res.data.user));
         toast.success("Login successful");
-        const redirectTo = (location.state as any)?.from;
-        navigate(redirectTo || "/");
+        const from = (location.state as any)?.from;
+        const fromPath = typeof from === "string" ? from : from?.pathname;
+        navigate(fromPath || "/");
       }
     } catch (error) {
       console.error("Error during Login:", error);
@@ -63,73 +70,70 @@ export default function Login() {
   return (
     <div className="min-h-screen flex flex-col bgMain-gradient">
       <Navbar />
-      <div className="flex-1 flex items-center justify-center mx-auto w-full">
-        <div className="container max-w-lg mx-auto p-4">
-          <Card className="border-gray-200 shadow-2xl rounded-2xl bg-gradient-to-r from-blue-50 to-blue-100">
-            <CardHeader className="text-center">
-              <CardTitle className="text-2xl font-bold">
-                Login an Account
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    className="border-1 border-gray-400"
+      <Box sx={{ flex: 1, display: "flex", alignItems: "center" }}>
+        <Container maxWidth="sm" sx={{ py: 4 }}>
+          <Paper elevation={8} sx={{ p: { xs: 3, sm: 4 }, borderRadius: 4, bgcolor: "rgba(255,255,255,0.92)" }}>
+            <Stack spacing={3}>
+              <Box textAlign="center">
+                <Typography variant="h4" sx={{ fontWeight: 800 }}>
+                  Login an Account
+                </Typography>
+              </Box>
+
+              <Box component="form" onSubmit={handleSubmit}>
+                <Stack spacing={2}>
+                  <TextField
                     id="email"
                     name="email"
                     type="email"
+                    label="Email"
                     placeholder="name@example.com"
                     value={input.email}
                     onChange={handleChange}
                     required
+                    fullWidth
                   />
-                </div>
 
-                <div className="space-y-2 relative">
-                  <Label htmlFor="password">Password</Label>
-                  <Input
-                    className="border-1 border-gray-400"
+                  <TextField
                     id="password"
                     name="password"
                     type="password"
+                    label="Password"
                     placeholder="••••••••"
                     value={input.password}
                     onChange={handleChange}
                     required
+                    fullWidth
                   />
-                </div>
-                {loading ? (
-                  <Button className="w-full bg-blue-700 hover:bg-blue-800 text-white cursor-pointer">
-                    <span className="mr-2">Loading...</span>
-                    <Loader />
-                  </Button>
-                ) : (
+
                   <Button
                     type="submit"
-                    className="w-full bg-blue-700 hover:bg-blue-800 text-white cursor-pointer"
+                    variant="contained"
+                    size="large"
+                    disabled={Boolean(loading)}
+                    fullWidth
+                    endIcon={loading ? <CircularProgress size={18} color="inherit" /> : undefined}
                   >
-                    Login
+                    {loading ? "Loading..." : "Login"}
                   </Button>
-                )}
 
-                <div className="mt-6 text-center">
-                  <p className="text-sm text-gray-600">
+                  <Typography variant="body2" textAlign="center" sx={{ color: "text.secondary" }}>
                     Don't have an account?{" "}
-                    <Link
+                    <Button
+                      component={Link}
                       to="/signup"
-                      className="text-blue-600 hover:underline"
+                      variant="text"
+                      sx={{ textTransform: "none", px: 0.5, minWidth: 0, fontWeight: 700 }}
                     >
                       Sign Up
-                    </Link>
-                  </p>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+                    </Button>
+                  </Typography>
+                </Stack>
+              </Box>
+            </Stack>
+          </Paper>
+        </Container>
+      </Box>
     </div>
   );
 }

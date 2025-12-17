@@ -10,30 +10,23 @@ import {
 } from "@mui/material";
 
 const filterData = [
-  {
-    filterType: "Location",
-    array: ["Karachi", "Lahore", "Islamabad", "Peshawar", "Quetta"],
-  },
+ 
   {
     filterType: "Industry",
     array: [
       "Frontend Developer",
       "Backend Developer",
+      "School Teacher",
+      "College Teacher",
+      "University Teacher",
       "Full Stack Developer",
       "Mobile Developer",
-      "Data Scientist",
-      "Machine Learning Engineer",
-      "DevOps Engineer",
-      "Cloud Engineer",
-      "Cybersecurity Analyst",
-      "Network Engineer",
-      "Database Administrator",
-      "System Administrator",
-      "Technical Support Specialist",
-      "IT Project Manager",
-      "Business Analyst",
-      "Product Manager",
+
     ],
+  },
+ {
+    filterType: "Location",
+    array: ["Karachi", "Lahore", "Islamabad", "Peshawar", "Quetta"],
   },
   {
     filterType: "Salary",
@@ -63,7 +56,7 @@ function FilterCard({ onFilterChange }: FilterCardProps) {
 
   return (
     <Paper variant="outlined" sx={{ overflow: "hidden", borderRadius: 2 }}>
-      <Box className="bgMain-gradient" sx={{ height: 6, width: "100%" }} />
+      <Box className="bg-footer" sx={{ height: 2, width: "100%" }} />
       <Box sx={{ p: 2 }}>
         <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
           Filter Jobs

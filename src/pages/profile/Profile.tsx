@@ -3,6 +3,7 @@ import Navbar from "@/components/global/Navbar";
 import React from "react";
 import { useSelector, useDispatch } from "react-redux";
 import useGetAppliedJobs from "../../hooks/useGetAppliedJobs";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { setUser } from "../../../redux/authSlice";
 import axiosInstance from "@/utils/axios";
@@ -27,6 +28,7 @@ function Profile() {
   useGetAppliedJobs();
   const { user } = useSelector((store: any) => store.auth);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [editMode, setEditMode] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [form, setForm] = React.useState({
@@ -239,9 +241,16 @@ function Profile() {
 
               <Box sx={{ display: "flex", gap: 1, justifyContent: { xs: "stretch", sm: "flex-end" } }}>
                 {!editMode ? (
-                  <Button variant="contained" onClick={() => setEditMode(true)}>
-                    Edit Profile
-                  </Button>
+                  <>
+                    {user && user.role === "recruiter" ? (
+                      <Button variant="outlined" onClick={() => navigate("/recruiter/dashboard")}>
+                        Recruiter Dashboard
+                      </Button>
+                    ) : null}
+                    <Button variant="contained" onClick={() => setEditMode(true)}>
+                      Edit Profile
+                    </Button>
+                  </>
                 ) : (
                   <>
                     <Button variant="contained" onClick={handleSave} disabled={loading}>

@@ -4,8 +4,14 @@ import SearchBox from "./search-box";
 import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Box, Button, Container, Paper, Stack, Typography } from "@mui/material";
+import { GraduationCap, Code2, Sparkles } from "lucide-react";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 function Hero() {
+  const navigate = useNavigate();
+  const { allJobs } = useSelector((store: any) => store.job);
+
   const headlineVariants = useMemo(
     () => [
       "Dream Job",
@@ -36,11 +42,10 @@ function Hero() {
     []
   );
 
-  const [active, setActive] = useState(0);
-
   useEffect(() => {
     const id = window.setInterval(() => {
-      setActive((p) => (p + 1) % slides.length);
+      // keep the interval alive for future use (e.g., announcements), but no carousel UI is shown now
+      // leaving this empty avoids user-visible motion noise in the hero
     }, 4500);
     return () => window.clearInterval(id);
   }, [slides.length]);
@@ -90,7 +95,7 @@ function Hero() {
                       transition={{ duration: 0.35 }}
                       style={{
                         display: "inline-block",
-                        background: "linear-gradient(90deg, #93C5FD, #22D3EE, #F472B6)",
+                        background: "linear-gradient(90deg, #93C5FD, #22D3EE, #ffffff)",
                         WebkitBackgroundClip: "text",
                         color: "transparent",
                       }}
@@ -124,55 +129,97 @@ function Hero() {
               <CategoryCarousel />
             </motion.div>
 
-            <Paper
-              variant="outlined"
-              sx={{
-                width: "100%",
-                maxWidth: 980,
-                p: { xs: 2, sm: 3 },
-                borderRadius: 3,
-                backgroundColor: "rgba(255,255,255,0.14)",
-                backdropFilter: "blur(10px)",
-                borderColor: "rgba(255,255,255,0.22)",
-              }}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.5 }}
+              style={{ width: "100%", maxWidth: 980 }}
             >
-              <Stack direction={{ xs: "column", md: "row" }} spacing={2} alignItems={{ md: "center" }} justifyContent="space-between">
-                <Box sx={{ flex: 1, minHeight: 74 }}>
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={active}
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -8 }}
-                      transition={{ duration: 0.35 }}
+              <Paper
+                variant="outlined"
+                sx={{
+                  width: "100%",
+                  p: { xs: 2, sm: 3 },
+                  borderRadius: 3,
+                  backgroundColor: "rgba(255,255,255,0.14)",
+                  backdropFilter: "blur(10px)",
+                  borderColor: "rgba(255,255,255,0.22)",
+                }}
+              >
+                <Stack spacing={2}>
+                  <Stack direction="row" spacing={1} alignItems="center" justifyContent="space-between">
+                    <Typography variant="subtitle1" sx={{ fontWeight: 900, color: "#fff" }}>
+                      Featured Jobs
+                    </Typography>
+                    <Button
+                      variant="text"
+                      href="/jobs"
+                      sx={{ textTransform: "none", color: "rgba(255,255,255,0.92)" }}
                     >
-                      <Typography variant="subtitle1" sx={{ fontWeight: 800, color: "#fff" }}>
-                        {slides[active].title}
-                      </Typography>
-                      <Typography variant="body2" sx={{ mt: 0.5, color: "rgba(255,255,255,0.78)" }}>
-                        {slides[active].subtitle}
-                      </Typography>
-                    </motion.div>
-                  </AnimatePresence>
-                </Box>
-                <Stack direction="row" spacing={1} justifyContent="center">
-                  {slides.map((_, i) => (
-                    <Box
-                      key={i}
-                      onClick={() => setActive(i)}
-                      sx={{
-                        width: 10,
-                        height: 10,
-                        borderRadius: 999,
-                        cursor: "pointer",
-                        backgroundColor: i === active ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.35)",
-                        transition: "background-color 150ms ease",
-                      }}
-                    />
-                  ))}
+                      View all
+                    </Button>
+                  </Stack>
+
+                  <Stack direction={{ xs: "column", md: "row" }} spacing={1.5}>
+                    {(allJobs || []).slice(0, 3).map((job: any, idx: number) => (
+                      <motion.div
+                        key={job?._id || idx}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.35, delay: idx * 0.05 }}
+                        whileHover={{ y: -3, scale: 1.01 }}
+                        style={{ flex: 1 }}
+                      >
+                        <Paper
+                          onClick={() => job?._id && navigate(`/jobs?jobId=${job._id}`)}
+                          sx={{
+                            p: 2,
+                            borderRadius: 2.5,
+                            cursor: job?._id ? "pointer" : "default",
+                            backgroundColor: "rgba(0,0,0,0.18)",
+                            border: "1px solid rgba(255,255,255,0.18)",
+                            color: "#fff",
+                            "&:hover": { backgroundColor: "rgba(0,0,0,0.22)" },
+                          }}
+                        >
+                          <Stack spacing={0.75}>
+                            <Typography variant="subtitle2" sx={{ fontWeight: 900, lineHeight: 1.2 }}>
+                              {job?.title || "New opportunity"}
+                            </Typography>
+                            <Typography variant="caption" sx={{ color: "rgba(255,255,255,0.75)" }}>
+                              {job?.company?.name || "Organization"} · {job?.location || "On-site / Remote"}
+                            </Typography>
+                            <Stack direction="row" spacing={1} alignItems="center" sx={{ pt: 0.5 }}>
+                              <Sparkles size={14} color="#fff" />
+                              <Typography variant="caption" sx={{ color: "rgba(255,255,255,0.78)", fontWeight: 700 }}>
+                                Apply in minutes
+                              </Typography>
+                            </Stack>
+                          </Stack>
+                        </Paper>
+                      </motion.div>
+                    ))}
+
+                    {(allJobs || []).length === 0 ? (
+                      <Paper
+                        sx={{
+                          p: 2,
+                          borderRadius: 2.5,
+                          backgroundColor: "rgba(0,0,0,0.18)",
+                          border: "1px solid rgba(255,255,255,0.18)",
+                          color: "#fff",
+                          flex: 1,
+                        }}
+                      >
+                        <Typography variant="body2" sx={{ color: "rgba(255,255,255,0.8)" }}>
+                          No jobs to feature yet. Try searching to explore opportunities.
+                        </Typography>
+                      </Paper>
+                    ) : null}
+                  </Stack>
                 </Stack>
-              </Stack>
-            </Paper>
+              </Paper>
+            </motion.div>
 
             <Stack direction="row" spacing={1.5} justifyContent="center" sx={{ pt: 1 }}>
               <Button variant="contained" href="/jobs" sx={{ textTransform: "none" }}>
@@ -191,6 +238,8 @@ function Hero() {
                 Create Profile
               </Button>
             </Stack>
+
+         
           </Stack>
         </Container>
       </section>

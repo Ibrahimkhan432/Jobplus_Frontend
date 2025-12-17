@@ -5,12 +5,6 @@ import Jobs from "@/pages/jobs/Jobs";
 import Browser from "@/components/Browser";
 import Profile from "@/pages/profile/Profile";
 import JobDescription from "@/components/JobDescription";
-// import Companies from "@/pages/admin/Companies";
-// import CreateCompany from "@/pages/admin/CreateCompany";
-// import CompanySetup from "@/pages/admin/CompanySetup";
-// import AdminJobs from "@/pages/admin/AdminJobs";
-// import CreateJob from "@/pages/admin/CreateJob";
-// import JobApplicants from "@/pages/admin/JobApplicants";
 import ProtectedRoute from "@/router/ProtectedRoute";
 import { createBrowserRouter, Outlet, useLocation } from "react-router-dom";
 import RecruiterDashboard from "@/pages/recruiter/RecruiterDashboard";
@@ -67,23 +61,5 @@ const router = createBrowserRouter([
     ],
   },
 ])
-
-// Admin Protected Routes (all children protected)
-// {
-//   path: "/admin",
-//   element: (
-//     <ProtectedRoute allowedRoles={["recruiter"]}>
-//       <Outlet />
-//     </ProtectedRoute>
-//   ),
-//   children: [
-//     { path: "companies", element: <Companies /> },
-//     { path: "companies/create", element: <CreateCompany /> },
-//     { path: "companies/:id", element: <CompanySetup /> },
-//     { path: "jobs", element: <AdminJobs /> },
-//     { path: "jobs/create", element: <CreateJob /> },
-//     { path: "jobs/:id/applicants", element: <JobApplicants /> },
-//   ],
-// },
 
 export default router;

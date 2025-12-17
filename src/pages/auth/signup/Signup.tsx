@@ -1,23 +1,26 @@
 import type React from "react";
 import { useEffect, useState } from "react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import Navbar from "../../../components/global/Navbar";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { RadioGroup } from "@/components/ui/radio-group";
 import { toast } from "sonner";
 import { useDispatch, useSelector } from "react-redux";
 import { setLoadnig, setUser } from "./../../../../redux/authSlice";
-import { Loader } from "lucide-react";
 import axiosInstance from "@/utils/axios";
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Container,
+  FormControl,
+  FormControlLabel,
+  FormLabel,
+  Paper,
+  Radio,
+  RadioGroup,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
 
 export default function Signup() {
   const [input, setInput] = useState({
@@ -40,7 +43,7 @@ export default function Signup() {
     }
   }, [user, navigate, location.state]);
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
     setInput((input) => ({ ...input, [name]: value }));
@@ -79,142 +82,109 @@ export default function Signup() {
   return (
     <div className="min-h-screen flex flex-col bgMain-gradient">
       <Navbar />
-      <div className="flex-1 flex items-center justify-center w-full">
-        <div className="container max-w-lg mx-auto p-6">
-          <Card className="border-gray-200 shadow-2xl rounded-2xl bg-gradient-to-r from-blue-50 to-blue-100">
-            <CardHeader className="text-center">
-              <CardTitle className="text-2xl font-bold">
-                Create an Account
-              </CardTitle>
-              <CardDescription>
-                Join Job Plus to find your dream job
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="fullname">Full Name</Label>
-                  <Input
-                    className="border-1 border-gray-400"
-                    type="text"
+      <Box sx={{ flex: 1, display: "flex", alignItems: "center" }}>
+        <Container maxWidth="sm" sx={{ py: 4 }}>
+          <Paper elevation={8} sx={{ p: { xs: 3, sm: 4 }, borderRadius: 4, bgcolor: "rgba(255,255,255,0.92)" }}>
+            <Stack spacing={3}>
+              <Box textAlign="center">
+                <Typography variant="h4" sx={{ fontWeight: 800 }}>
+                  Create an Account
+                </Typography>
+                <Typography variant="body2" sx={{ color: "text.secondary", mt: 0.5 }}>
+                  Join Job Plus to find your dream job
+                </Typography>
+              </Box>
+
+              <Box component="form" onSubmit={handleSubmit}>
+                <Stack spacing={2}>
+                  <TextField
                     id="name"
                     name="fullName"
-                    placeholder="full name"
+                    label="Full Name"
+                    placeholder="Full name"
                     value={input.fullName}
                     onChange={handleChange}
                     required
+                    fullWidth
                   />
-                </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    className="border-1 border-gray-400"
+                  <TextField
                     id="email"
                     name="email"
                     type="email"
+                    label="Email"
                     placeholder="name@example.com"
                     value={input.email}
                     onChange={handleChange}
                     required
+                    fullWidth
                   />
-                </div>
 
-                <div className="space-y-2 relative">
-                  <Label htmlFor="password">Password</Label>
-                  <Input
-                    className="border-1 border-gray-400"
+                  <TextField
                     id="password"
                     name="password"
                     type="password"
+                    label="Password"
                     placeholder="••••••••"
                     value={input.password}
                     onChange={handleChange}
                     required
+                    fullWidth
                   />
-                </div>
-                {/* <div className="space-y-2 relative">
-                  <Label htmlFor="password">Confirm Password</Label>
-                  <Input
-                    className="border-1 border-gray-400"
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    type="password"
-                    placeholder="••••••••"
-                    value={input.confirmPassword}
-                    onChange={handleChange}
-                    required
-                  />
-                  {error && <p className="text-red-600 text-sm">{error}</p>}
-                </div> */}
 
-                <div className="space-y-2">
-                  <Label htmlFor="phoneNumber">Phone Number</Label>
-                  <Input
-                    className="border-1 border-gray-400"
+                  <TextField
                     id="phoneNumber"
                     name="phoneNumber"
+                    label="Phone Number"
                     placeholder="+92123456789"
                     value={input.phoneNumber}
                     onChange={handleChange}
                     required
+                    fullWidth
                   />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="accountType">I am a</Label>
-                  <RadioGroup className="flex item-center gap-4">
-                    <div className="flex items-center space-x-2">
-                      <Input
-                        type="radio"
-                        name="role"
-                        value="student"
-                        checked={input.role === "student"}
-                        className="cursor-pointer md:w-[20px]"
-                        onChange={handleChange}
-                      />
-                      <Label htmlFor="r1">Student</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Input
-                        type="radio"
-                        name="role"
-                        value="recruiter"
-                        checked={input.role === "recruiter"}
-                        className="cursor-pointer md:w-[20px]"
-                        onChange={handleChange}
-                      />
-                      <Label htmlFor="r2">Recruiter</Label>
-                    </div>
-                  </RadioGroup>
-                </div>
-                {loading ? (
-                  <Button className="w-full bg-blue-700 hover:bg-blue-800 text-white cursor-pointer">
-                    <span className="mr-2">Loading...</span>
-                    <Loader />
-                  </Button>
-                ) : (
+
+                  <FormControl>
+                    <FormLabel id="role-label">I am a</FormLabel>
+                    <RadioGroup
+                      row
+                      aria-labelledby="role-label"
+                      name="role"
+                      value={input.role}
+                      onChange={handleChange}
+                    >
+                      <FormControlLabel value="student" control={<Radio />} label="Student" />
+                      <FormControlLabel value="recruiter" control={<Radio />} label="Recruiter" />
+                    </RadioGroup>
+                  </FormControl>
 
                   <Button
                     type="submit"
-                    className="w-full bg-blue-700 hover:bg-blue-800 text-white cursor-pointer"
+                    variant="contained"
+                    size="large"
+                    disabled={Boolean(loading)}
+                    fullWidth
+                    endIcon={loading ? <CircularProgress size={18} color="inherit" /> : undefined}
                   >
-                    Create Account
+                    {loading ? "Loading..." : "Create Account"}
                   </Button>
-                )}
 
-                <div className="mt-6 text-center">
-                  <p className="text-sm text-gray-600">
+                  <Typography variant="body2" textAlign="center" sx={{ color: "text.secondary" }}>
                     Already have an account?{" "}
-                    <Link to="/login" className="text-blue-600 hover:underline">
+                    <Button
+                      component={Link}
+                      to="/login"
+                      variant="text"
+                      sx={{ textTransform: "none", px: 0.5, minWidth: 0, fontWeight: 700 }}
+                    >
                       Sign in
-                    </Link>
-                  </p>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+                    </Button>
+                  </Typography>
+                </Stack>
+              </Box>
+            </Stack>
+          </Paper>
+        </Container>
+      </Box>
     </div>
   );
 }

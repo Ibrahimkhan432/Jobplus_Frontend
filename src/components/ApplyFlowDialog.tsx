@@ -4,18 +4,19 @@ import { toast } from "sonner";
 
 import axiosInstance from "@/utils/axios";
 import { setUser } from "../../redux/authSlice";
-
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
+  Box,
+  Button,
+  CircularProgress,
   Dialog,
+  DialogActions,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
+  DialogContentText,
   DialogTitle,
-} from "@/components/ui/dialog";
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
 
 type Props = {
   jobId: string;
@@ -187,172 +188,200 @@ export default function ApplyFlowDialog({ jobId, trigger, onApplied }: Props) {
 
   return (
     <>
-      <Dialog open={isApplyOpen} onOpenChange={setIsApplyOpen}>
-        <span
-          onClick={() => setIsApplyOpen(true)}
-          className="inline-block"
-        >
-          {trigger}
-        </span>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Apply for this job</DialogTitle>
-            <DialogDescription>
-              Fill in your details. If you are not logged in, you will be asked to login/signup next.
-            </DialogDescription>
-          </DialogHeader>
+      <span onClick={() => setIsApplyOpen(true)} className="inline-block">
+        {trigger}
+      </span>
 
-          <form onSubmit={handleApplySubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="applicantName">Username</Label>
-              <Input
+      <Dialog open={isApplyOpen} onClose={() => setIsApplyOpen(false)} fullWidth maxWidth="sm">
+        <DialogTitle>Apply for this job</DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ mb: 2 }}>
+            Fill in your details. If you are not logged in, you will be asked to login/signup next.
+          </DialogContentText>
+
+          <Box component="form" onSubmit={handleApplySubmit}>
+            <Stack spacing={2}>
+              <TextField
                 id="applicantName"
+                label="Username"
                 value={applyForm.applicantName}
                 onChange={(e) => setApplyForm((p) => ({ ...p, applicantName: e.target.value }))}
                 required
+                fullWidth
               />
-            </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="resume">Upload Resume</Label>
-              <Input
-                id="resume"
-                type="file"
-                onChange={(e) => setApplyForm((p) => ({ ...p, resumeFile: e.target.files?.[0] || null }))}
-              />
-            </div>
+              <Box>
+                <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>
+                  Upload Resume
+                </Typography>
+                <Stack direction="row" spacing={1} alignItems="center" useFlexGap flexWrap="wrap">
+                  <Button component="label" variant="outlined">
+                    Choose file
+                    <input
+                      hidden
+                      type="file"
+                      onChange={(e) =>
+                        setApplyForm((p) => ({ ...p, resumeFile: e.target.files?.[0] || null }))
+                      }
+                    />
+                  </Button>
+                  <Typography variant="body2" color="text.secondary">
+                    {applyForm.resumeFile?.name || "No file selected"}
+                  </Typography>
+                </Stack>
+              </Box>
 
-            <div className="space-y-2">
-              <Label htmlFor="expectedSalary">Expected Salary</Label>
-              <Input
+              <TextField
                 id="expectedSalary"
+                label="Expected Salary"
                 type="number"
                 value={applyForm.expectedSalary}
                 onChange={(e) => setApplyForm((p) => ({ ...p, expectedSalary: e.target.value }))}
+                fullWidth
               />
-            </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="location">Location</Label>
-              <Input
+              <TextField
                 id="location"
+                label="Location"
                 value={applyForm.location}
                 onChange={(e) => setApplyForm((p) => ({ ...p, location: e.target.value }))}
                 required
+                fullWidth
               />
-            </div>
 
-            <DialogFooter>
-              <Button type="submit" disabled={isSubmitting} className="bgMain-gradient text-white">
-                {isLoggedIn ? "Submit Application" : "Continue"}
-              </Button>
-            </DialogFooter>
-          </form>
+              <DialogActions sx={{ px: 0 }}>
+                <Button onClick={() => setIsApplyOpen(false)} variant="text" disabled={isSubmitting}>
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  disabled={isSubmitting}
+                  endIcon={isSubmitting ? <CircularProgress size={18} color="inherit" /> : undefined}
+                >
+                  {isLoggedIn ? "Submit Application" : "Continue"}
+                </Button>
+              </DialogActions>
+            </Stack>
+          </Box>
         </DialogContent>
       </Dialog>
 
-      <Dialog open={isAuthOpen} onOpenChange={setIsAuthOpen}>
+      <Dialog open={isAuthOpen} onClose={() => setIsAuthOpen(false)} fullWidth maxWidth="sm">
+        <DialogTitle>{authMode === "login" ? "Login" : "Create an account"}</DialogTitle>
         <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{authMode === "login" ? "Login" : "Create an account"}</DialogTitle>
-            <DialogDescription>
-              {authMode === "login"
-                ? "Login to submit your application."
-                : "Create an account to submit your application."}
-            </DialogDescription>
-          </DialogHeader>
+          <DialogContentText sx={{ mb: 2 }}>
+            {authMode === "login"
+              ? "Login to submit your application."
+              : "Create an account to submit your application."}
+          </DialogContentText>
 
           {authMode === "login" ? (
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="loginEmail">Email</Label>
-                <Input
+            <Box component="form" onSubmit={handleLogin}>
+              <Stack spacing={2}>
+                <TextField
                   id="loginEmail"
                   type="email"
+                  label="Email"
                   value={loginForm.email}
                   onChange={(e) => setLoginForm((p) => ({ ...p, email: e.target.value }))}
                   required
+                  fullWidth
                 />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="loginPassword">Password</Label>
-                <Input
+                <TextField
                   id="loginPassword"
                   type="password"
+                  label="Password"
                   value={loginForm.password}
                   onChange={(e) => setLoginForm((p) => ({ ...p, password: e.target.value }))}
                   required
+                  fullWidth
                 />
-              </div>
 
-              <DialogFooter>
-                <Button type="submit" disabled={isSubmitting} className="bgMain-gradient text-white">
-                  Login & Apply
-                </Button>
-              </DialogFooter>
+                <DialogActions sx={{ px: 0 }}>
+                  <Button onClick={() => setIsAuthOpen(false)} variant="text" disabled={isSubmitting}>
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    disabled={isSubmitting}
+                    endIcon={isSubmitting ? <CircularProgress size={18} color="inherit" /> : undefined}
+                  >
+                    Login & Apply
+                  </Button>
+                </DialogActions>
 
-              <div className="text-sm text-gray-600">
-                Don&apos;t have an account?{" "}
-                <button
-                  type="button"
-                  className="text-blue-600 hover:underline"
-                  onClick={() => setAuthMode("signup")}
-                >
-                  Sign up
-                </button>
-              </div>
-            </form>
+                <Typography variant="body2" color="text.secondary">
+                  Don&apos;t have an account?{" "}
+                  <Button
+                    type="button"
+                    variant="text"
+                    onClick={() => setAuthMode("signup")}
+                    sx={{ textTransform: "none", px: 0.5, minWidth: 0, fontWeight: 700 }}
+                  >
+                    Sign up
+                  </Button>
+                </Typography>
+              </Stack>
+            </Box>
           ) : (
-            <form onSubmit={handleSignup} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="signupName">Name</Label>
-                <Input
+            <Box component="form" onSubmit={handleSignup}>
+              <Stack spacing={2}>
+                <TextField
                   id="signupName"
+                  label="Name"
                   value={signupForm.fullName}
                   onChange={(e) => setSignupForm((p) => ({ ...p, fullName: e.target.value }))}
                   required
+                  fullWidth
                 />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="signupEmail">Email</Label>
-                <Input
+                <TextField
                   id="signupEmail"
                   type="email"
+                  label="Email"
                   value={signupForm.email}
                   onChange={(e) => setSignupForm((p) => ({ ...p, email: e.target.value }))}
                   required
+                  fullWidth
                 />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="signupPassword">Password</Label>
-                <Input
+                <TextField
                   id="signupPassword"
                   type="password"
+                  label="Password"
                   value={signupForm.password}
                   onChange={(e) => setSignupForm((p) => ({ ...p, password: e.target.value }))}
                   required
+                  fullWidth
                 />
-              </div>
 
-              <DialogFooter>
-                <Button type="submit" disabled={isSubmitting} className="bgMain-gradient text-white">
-                  Sign up & Apply
-                </Button>
-              </DialogFooter>
+                <DialogActions sx={{ px: 0 }}>
+                  <Button onClick={() => setIsAuthOpen(false)} variant="text" disabled={isSubmitting}>
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    disabled={isSubmitting}
+                    endIcon={isSubmitting ? <CircularProgress size={18} color="inherit" /> : undefined}
+                  >
+                    Sign up & Apply
+                  </Button>
+                </DialogActions>
 
-              <div className="text-sm text-gray-600">
-                Already have an account?{" "}
-                <button
-                  type="button"
-                  className="text-blue-600 hover:underline"
-                  onClick={() => setAuthMode("login")}
-                >
-                  Login
-                </button>
-              </div>
-            </form>
+                <Typography variant="body2" color="text.secondary">
+                  Already have an account?{" "}
+                  <Button
+                    type="button"
+                    variant="text"
+                    onClick={() => setAuthMode("login")}
+                    sx={{ textTransform: "none", px: 0.5, minWidth: 0, fontWeight: 700 }}
+                  >
+                    Login
+                  </Button>
+                </Typography>
+              </Stack>
+            </Box>
           )}
         </DialogContent>
       </Dialog>

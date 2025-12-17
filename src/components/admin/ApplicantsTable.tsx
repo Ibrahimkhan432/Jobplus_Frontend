@@ -1,10 +1,12 @@
 import { useMemo, useState, type MouseEvent } from 'react'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { toast } from 'sonner'
 import axiosInstance from '@/utils/axios'
+import { setAllApplicants } from '../../../redux/applicationSlice'
 import {
   Box,
   Button,
+  Chip,
   Menu,
   MenuItem,
   Typography,
@@ -39,6 +41,7 @@ const LoadingOverlay = () => {
 }
 
 const ApplicantsTable = () => {
+  const dispatch = useDispatch()
   const { applicants } = useSelector((store: any) => store.application)
   const applications = applicants?.applications ?? []
   const [actionAnchorEl, setActionAnchorEl] = useState<null | HTMLElement>(null)
@@ -61,6 +64,17 @@ const ApplicantsTable = () => {
       const res = await axiosInstance.post(`/application/status/${id}/update`, { status })
       if (res.data.success) {
         toast.success(res.data.message)
+
+        if (applicants?.applications) {
+          const nextStatus = String(status).toLowerCase()
+          const nextApplicants = {
+            ...applicants,
+            applications: applicants.applications.map((a: any) =>
+              String(a?._id) === String(id) ? { ...a, status: nextStatus } : a
+            ),
+          }
+          dispatch(setAllApplicants(nextApplicants))
+        }
       }
     } catch (error) {
       console.log("error in job applicantTable", error)
@@ -75,6 +89,7 @@ const ApplicantsTable = () => {
       contact: item?.applicant?.phoneNumber ?? "",
       resumeUrl: item?.applicant?.profile?.resume ?? "",
       resumeName: item?.applicant?.profile?.resumeOriginalName ?? "Resume",
+      status: String(item?.status || "pending").toLowerCase(),
       date: item?.applicant?.createdAt ? String(item.applicant.createdAt).split("T")[0] : "",
     }))
   }, [applications])
@@ -84,6 +99,17 @@ const ApplicantsTable = () => {
       { field: 'fullName', headerName: 'Full Name', flex: 1, minWidth: 160 },
       { field: 'email', headerName: 'Email', flex: 1, minWidth: 220 },
       { field: 'contact', headerName: 'Contact', flex: 1, minWidth: 140 },
+      {
+        field: 'status',
+        headerName: 'Status',
+        width: 140,
+        renderCell: (params) => {
+          const value = String(params.value || '').toLowerCase()
+          const color = value === 'accepted' ? 'success' : value === 'rejected' ? 'error' : 'warning'
+          const label = value ? value.toUpperCase() : 'PENDING'
+          return <Chip size="small" label={label} color={color as any} variant="outlined" />
+        },
+      },
       {
         field: 'resume',
         headerName: 'Resume',

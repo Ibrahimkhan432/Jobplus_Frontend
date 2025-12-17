@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { User, LogOut, Menu as MenuIcon, Bell } from "lucide-react";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
-import { setUser } from "../../../redux/authSlice"
+import { setUser } from "../../../redux/authSlice";
 import axiosInstance from "@/utils/axios";
 import {
   markAllReadLocal,
@@ -21,7 +21,6 @@ import {
   Badge,
   Box,
   Button,
-  Container,
   Divider,
   Drawer,
   IconButton,
@@ -47,7 +46,6 @@ export default function Navbar({ variant = "default" }: { variant?: NavbarVarian
 
   const pollRef = useRef<number | null>(null);
 
-  const isRecruiter = useMemo(() => user?.role === "recruiter", [user?.role]);
   const isLanding = variant === "landing";
 
   const fetchNotifications = async () => {
@@ -78,13 +76,12 @@ export default function Navbar({ variant = "default" }: { variant?: NavbarVarian
   }, [user?._id]);
 
   const handleLogout = async () => {
-
     try {
       const res = await axiosInstance.get(`/user/logout`, {
         withCredentials: true,
       });
       if (res.data.success) {
-        localStorage.removeItem("token")
+        localStorage.removeItem("token");
         dispatch(setUser(null));
         navigate("/");
         toast.success(res.data.message);
@@ -103,133 +100,176 @@ export default function Navbar({ variant = "default" }: { variant?: NavbarVarian
         color: isLanding ? "#fff" : "text.primary",
         backdropFilter: "none",
         borderBottom: "none",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+
       }}
     >
-      <Container maxWidth={false} sx={{ pt: 1.25, pb: 1.25, px: 0 }}>
+      <Box
+        sx={{
+          width: "90%",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          px: { xs: 2, sm: 4, md: 6 },
+        }}
+      >
         <Box
           sx={{
+            marginTop: 2,
             width: "100%",
             maxWidth: 1320,
-            marginLeft: { xs: 2, sm: 6, md: 9 },
-            marginRight: { xs: 3, sm: 6, md: 9 },
-            paddingLeft: { xs: 2, sm: 3, md: 4 },
-            paddingRight: { xs: 2, sm: 3, md: 4 },
-            paddingTop: { xs: 0.1, sm: 0.2 },
-            paddingBottom: { xs: 0.1, sm: 0.2 },
             borderRadius: 999,
-            backgroundColor: isLanding ? "rgba(11,16,47,0.30)" : "rgba(255,255,255,0.85)",
+            backgroundColor: isLanding ? "rgba(255, 255, 255, 0.75)" : "rgba(255, 255, 255, 0.75)",
             backdropFilter: "blur(12px)",
-            border: isLanding ? "1px solid rgba(255,255,255,0.16)" : "1px solid rgba(0,0,0,0.06)",
-            boxShadow: isLanding ? "0 14px 40px rgba(0,0,0,0.32)" : "0 14px 40px rgba(15,23,42,0.12)",
+            border: "2px solid #1976d2",
+            boxShadow: "0 14px 40px rgba(15,23,42,0.12)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
           }}
         >
-          <Toolbar disableGutters sx={{ minHeight: 64 }}>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Toolbar 
+            disableGutters 
+            sx={{ 
+              minHeight: 64,
+              width: "100%",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              px: { xs: 1, sm: 2, md: 3 },
+            }}
+          >
+            {/* Left side - Logo */}
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, flex: 1 }}>
               <Button
                 component={RouterLink}
                 to="/"
-                color="inherit"
+                color="primary"
                 sx={{ textTransform: "none", p: 0, minWidth: 0 }}
               >
                 <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
                   <Typography variant="h6" sx={{ fontWeight: 900, lineHeight: 1 }}>
                     Job Plus
                   </Typography>
-                  <Typography variant="caption" sx={{ opacity: 0.75, color: isLanding ? "rgba(255,255,255,0.85)" : undefined }}>
+                  <Typography 
+                    variant="caption" 
+                    sx={{ 
+                      opacity: 0.75, 
+                      color: isLanding ? "rgba(13, 16, 161, 0.85)" : undefined 
+                    }}
+                  >
                     Find Your Dream Career
                   </Typography>
                 </Box>
               </Button>
             </Box>
 
-          <Box sx={{ display: { xs: "none", md: "flex" }, gap: 1, flex: 1, justifyContent: "center" }}>
-            {isRecruiter ? (
+            {/* Center - Navigation Links */}
+            <Box 
+              sx={{ 
+                display: { xs: "none", md: "flex" }, 
+                gap: 2, 
+                flex: 1, 
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
               <>
-                <Button
-                  component={RouterLink}
-                  to="/recruiter/dashboard"
-                  color="inherit"
-                  sx={{ textTransform: "none" }}
-                >
-                  My Companies
-                </Button>
-                <Button
-                  component={RouterLink}
-                  to="/recruiter/dashboard"
-                  color="inherit"
-                  sx={{ textTransform: "none" }}
-                >
-                  My Jobs
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button component={RouterLink} to="/" color="inherit" sx={{ textTransform: "none" }}>
+                <Button component={RouterLink} to="/" color="primary" sx={{ textTransform: "none" }}>
                   Home
                 </Button>
-                <Button component={RouterLink} to="/jobs" color="inherit" sx={{ textTransform: "none" }}>
+                <Button component={RouterLink} to="/jobs" color="primary" sx={{ textTransform: "none" }}>
                   Jobs
                 </Button>
-                <Button component={RouterLink} to="/browser" color="inherit" sx={{ textTransform: "none" }}>
+                <Button component={RouterLink} to="/browser" color="primary" sx={{ textTransform: "none" }}>
                   Browser
                 </Button>
               </>
-            )}
-          </Box>
+            </Box>
 
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1, ml: "auto" }}>
-            {user ? (
-              <>
-                <IconButton
-                  color="inherit"
-                  onClick={(e) => {
-                    setNotificationAnchor(e.currentTarget);
-                    fetchNotifications();
-                  }}
-                >
-                  <Badge color="error" badgeContent={unreadCount} overlap="circular">
-                    <Bell size={20} />
-                  </Badge>
-                </IconButton>
-
-                <IconButton
-                  onClick={(e) => setUserMenuAnchor(e.currentTarget)}
-                  sx={{
-                    p: 0.5,
-                    border: isLanding ? "2px solid rgba(255,255,255,0.35)" : "2px solid rgba(0,0,0,0.12)",
-                  }}
-                >
-                  <Avatar
-                    src={user.profile || "/placeholder.svg"}
-                    alt={user.fullName}
-                    sx={{ width: 32, height: 32 }}
-                  >
-                    {user.fullName?.[0] ?? "U"}
-                  </Avatar>
-                </IconButton>
-              </>
-            ) : (
-              <Box sx={{ display: { xs: "none", md: "flex" }, gap: 1 }}>
-                <Button component={RouterLink} to="/login" color="inherit" sx={{ textTransform: "none" }}>
-                  Login
-                </Button>
-                <Button component={RouterLink} to="/signup" color="inherit" sx={{ textTransform: "none" }}>
-                  Join Now
-                </Button>
-              </Box>
-            )}
-
-            <IconButton
-              sx={{ display: { xs: "inline-flex", md: "none" } }}
-              onClick={() => setIsOpen(true)}
+            {/* Right side - User Actions */}
+            <Box 
+              sx={{ 
+                display: "flex", 
+                alignItems: "center", 
+                gap: 2, 
+                flex: 1,
+                justifyContent: "flex-end",
+              }}
             >
-              <MenuIcon size={22} />
-            </IconButton>
-          </Box>
-        </Toolbar>
-        </Box>
-      </Container>
+              {user ? (
+                <>
+                  <IconButton
+                    color="inherit"
+                    onClick={(e) => {
+                      setNotificationAnchor(e.currentTarget);
+                      fetchNotifications();
+                    }}
+                  >
+                    <Badge color="error" badgeContent={unreadCount} overlap="circular">
+                      <Bell size={20} />
+                    </Badge>
+                  </IconButton>
 
+                  <IconButton
+                    onClick={(e) => setUserMenuAnchor(e.currentTarget)}
+                    sx={{
+                      p: 0.5,
+                      border: "2px solid rgba(25, 118, 210, 0.3)", // Blue tint border
+                    }}
+                  >
+                    <Avatar
+                      src={user.profile || "/placeholder.svg"}
+                      alt={user.fullName}
+                      sx={{ width: 32, height: 32 }}
+                    >
+                      {user.fullName?.[0] ?? "U"}
+                    </Avatar>
+                  </IconButton>
+                </>
+              ) : (
+                <Box sx={{ display: { xs: "none", md: "flex" }, gap: 2 }}>
+                  <Button 
+                    component={RouterLink} 
+                    to="/login" 
+                    color="primary" 
+                    sx={{ 
+                      textTransform: "none",
+                      border: "1px solid rgba(25, 118, 210, 0.5)",
+                      px: 2,
+                    }}
+                  >
+                    Login
+                  </Button>
+                  <Button 
+                    component={RouterLink} 
+                    to="/signup" 
+                    color="primary"
+                    variant="contained"
+                    sx={{ 
+                      textTransform: "none",
+                      px: 2,
+                    }}
+                  >
+                    Join Now
+                  </Button>
+                </Box>
+              )}
+
+              <IconButton
+                sx={{ display: { xs: "inline-flex", md: "none" } }}
+                onClick={() => setIsOpen(true)}
+              >
+                <MenuIcon size={22} />
+              </IconButton>
+            </Box>
+          </Toolbar>
+        </Box>
+      </Box>
+
+      {/* User Menu */}
       <Menu
         anchorEl={userMenuAnchor}
         open={Boolean(userMenuAnchor)}
@@ -257,13 +297,20 @@ export default function Navbar({ variant = "default" }: { variant?: NavbarVarian
         </MenuItem>
       </Menu>
 
+      {/* Notifications Menu */}
       <Menu
         anchorEl={notificationAnchor}
         open={Boolean(notificationAnchor)}
         onClose={() => setNotificationAnchor(null)}
         anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
         transformOrigin={{ vertical: "top", horizontal: "right" }}
-        PaperProps={{ sx: { width: 360, maxWidth: "90vw" } }}
+        PaperProps={{ 
+          sx: { 
+            width: 360, 
+            maxWidth: "90vw",
+            border: "1px solid #1976d2", // Blue border for notification menu
+          } 
+        }}
       >
         <Box sx={{ px: 2, py: 1.5, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
@@ -307,7 +354,10 @@ export default function Navbar({ variant = "default" }: { variant?: NavbarVarian
                 whiteSpace: "normal",
                 alignItems: "flex-start",
                 gap: 1,
-                backgroundColor: n.isRead ? "transparent" : "rgba(10,102,194,0.06)",
+                backgroundColor: n.isRead ? "transparent" : "rgba(25, 118, 210, 0.08)", // Blue tint for unread
+                "&:hover": {
+                  backgroundColor: "rgba(25, 118, 210, 0.12)", // Blue tint on hover
+                }
               }}
             >
               <Box sx={{ flex: 1 }}>
@@ -323,48 +373,98 @@ export default function Navbar({ variant = "default" }: { variant?: NavbarVarian
         )}
       </Menu>
 
-      <Drawer anchor="right" open={isOpen} onClose={() => setIsOpen(false)}>
+      {/* Mobile Drawer */}
+      <Drawer 
+        anchor="right" 
+        open={isOpen} 
+        onClose={() => setIsOpen(false)}
+        PaperProps={{
+          sx: {
+            borderLeft: "2px solid #1976d2", // Blue border for drawer
+          }
+        }}
+      >
         <Box sx={{ width: 260 }} role="presentation">
           <Box sx={{ p: 2 }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 700, color: "#1976d2" }}>
               Menu
             </Typography>
           </Box>
           <Divider />
           <List>
-            {isRecruiter ? (
-              <>
-                <ListItemButton component={RouterLink} to="/recruiter/dashboard" onClick={() => setIsOpen(false)}>
-                  <ListItemText primary="My Companies" />
-                </ListItemButton>
-                <ListItemButton component={RouterLink} to="/recruiter/dashboard" onClick={() => setIsOpen(false)}>
-                  <ListItemText primary="My Jobs" />
-                </ListItemButton>
-              </>
-            ) : (
-              <>
-                <ListItemButton component={RouterLink} to="/" onClick={() => setIsOpen(false)}>
-                  <ListItemText primary="Home" />
-                </ListItemButton>
-                <ListItemButton component={RouterLink} to="/jobs" onClick={() => setIsOpen(false)}>
-                  <ListItemText primary="Jobs" />
-                </ListItemButton>
-                <ListItemButton component={RouterLink} to="/browser" onClick={() => setIsOpen(false)}>
-                  <ListItemText primary="Browser" />
-                </ListItemButton>
-              </>
-            )}
+            <>
+              <ListItemButton 
+                component={RouterLink} 
+                to="/" 
+                onClick={() => setIsOpen(false)}
+                sx={{
+                  "&:hover": {
+                    backgroundColor: "rgba(25, 118, 210, 0.08)",
+                  }
+                }}
+              >
+                <ListItemText primary="Home" />
+              </ListItemButton>
+              <ListItemButton 
+                component={RouterLink} 
+                to="/jobs" 
+                onClick={() => setIsOpen(false)}
+                sx={{
+                  "&:hover": {
+                    backgroundColor: "rgba(25, 118, 210, 0.08)",
+                  }
+                }}
+              >
+                <ListItemText primary="Jobs" />
+              </ListItemButton>
+              <ListItemButton 
+                component={RouterLink} 
+                to="/browser" 
+                onClick={() => setIsOpen(false)}
+                sx={{
+                  "&:hover": {
+                    backgroundColor: "rgba(25, 118, 210, 0.08)",
+                  }
+                }}
+              >
+                <ListItemText primary="Browser" />
+              </ListItemButton>
+            </>
           </List>
 
           {!user ? (
             <>
               <Divider />
               <List>
-                <ListItemButton component={RouterLink} to="/login" onClick={() => setIsOpen(false)}>
+                <ListItemButton 
+                  component={RouterLink} 
+                  to="/login" 
+                  onClick={() => setIsOpen(false)}
+                  sx={{
+                    "&:hover": {
+                      backgroundColor: "rgba(25, 118, 210, 0.08)",
+                    }
+                  }}
+                >
                   <ListItemText primary="Login" />
                 </ListItemButton>
-                <ListItemButton component={RouterLink} to="/signup" onClick={() => setIsOpen(false)}>
-                  <ListItemText primary="Join Now" />
+                <ListItemButton 
+                  component={RouterLink} 
+                  to="/signup" 
+                  onClick={() => setIsOpen(false)}
+                  sx={{
+                    backgroundColor: "rgba(25, 118, 210, 0.1)",
+                    "&:hover": {
+                      backgroundColor: "rgba(25, 118, 210, 0.2)",
+                    }
+                  }}
+                >
+                  <ListItemText 
+                    primary="Join Now" 
+                    primaryTypographyProps={{ 
+                      sx: { color: "#1976d2", fontWeight: 600 } 
+                    }} 
+                  />
                 </ListItemButton>
               </List>
             </>
