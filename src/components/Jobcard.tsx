@@ -11,6 +11,7 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
+import { keyframes } from '@mui/system';
 
 function highlightText(text: string, search: string) {
   if (!search) return text;
@@ -54,6 +55,15 @@ const JobCard = ({ job, searchTerm, onSelect, selected }: any) => {
   };
 
   const daysAgo = daysAgoFunction(job?.createdAt);
+  
+  const isNewJob = daysAgo !== null && daysAgo <= 6;
+  
+  const borderBlink = keyframes({
+    '0%': { boxShadow: '0 0 0 2px #1976d2' },
+    '50%': { boxShadow: '0 0 0 2px transparent' },
+    '100%': { boxShadow: '0 0 0 2px #1976d2' },
+  });
+  
   return (
     <Card
       variant="outlined"
@@ -63,6 +73,9 @@ const JobCard = ({ job, searchTerm, onSelect, selected }: any) => {
         boxShadow: selected ? 2 : 0,
         transition: 'transform 150ms ease, box-shadow 150ms ease',
         '&:hover': { transform: selected ? 'none' : 'translateY(-1px)', boxShadow: 2 },
+        ...(isNewJob && {
+          animation: `${borderBlink.toString()} 1s infinite`,
+        }),
       }}
     >
       <CardActionArea
@@ -77,15 +90,29 @@ const JobCard = ({ job, searchTerm, onSelect, selected }: any) => {
       >
         <CardContent>
           <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
-            <Typography variant="caption" color="text.secondary">
-              {daysAgo === null
-                ? ""
-                : daysAgo === 0
-                  ? "Today"
-                  : daysAgo === 1
-                    ? "1 day ago"
-                    : `${daysAgo} days ago`}
-            </Typography>
+            <Stack direction="row" spacing={1} alignItems="center">
+              <Typography variant="caption" color="text.secondary">
+                {daysAgo === null
+                  ? ""
+                  : daysAgo === 0
+                    ? "Today"
+                    : daysAgo === 1
+                      ? "1 day ago"
+                      : `${daysAgo} days ago`}
+              </Typography>
+              {isNewJob && (
+                <Chip 
+                  label="NEW" 
+                  size="small" 
+                  sx={{ 
+                    backgroundColor: '#1976d2', 
+                    color: 'white', 
+                    fontWeight: 'bold',
+                    height: '20px'
+                  }} 
+                />
+              )}
+            </Stack>
             <IconButton size="small" aria-label="bookmark" onClick={(e) => e.stopPropagation()}>
               <Bookmark size={18} />
             </IconButton>

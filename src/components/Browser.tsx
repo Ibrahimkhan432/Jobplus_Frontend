@@ -26,9 +26,7 @@ function Browser() {
 
   return (
     <div>
-      <div className="bgMain-gradient">
-        <Navbar />
-      </div>
+      <Navbar />
       <div className="max-w-7xl mx-auto my-10 mt-5  px-2">
         <h1 className="text-xl font-bold ml-4">Search Results {allJobs.length}</h1>
         <div className="grid lg:grid-cols-3 gap-4 mt-2">

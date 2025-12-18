@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import Navbar from "@/components/global/Navbar";
@@ -8,14 +8,23 @@ import axiosInstance from "@/utils/axios";
 import useGetAllCompanies from "@/hooks/useGetAllCompanies";
 
 import {
+    Alert,
     Box,
     Button,
     Container,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
     FormControl,
+    FormControlLabel,
+    FormLabel,
     IconButton,
     InputLabel,
     MenuItem,
     Paper,
+    Radio,
+    RadioGroup,
     Select,
     Stack,
     TextField,
@@ -25,8 +34,12 @@ import type { SelectChangeEvent } from "@mui/material/Select";
 
 const CreateJob = () => {
     const navigate = useNavigate();
+    const { user } = useSelector((store: any) => store.auth);
     useGetAllCompanies()
     const { companies } = useSelector((store: any) => store.company);
+    
+    // Check if user is a recruiter (no verification needed)
+    const isRecruiter = user?.role === "recruiter";
 
     const [formData, setFormData] = useState({
         title: "",
@@ -40,6 +53,9 @@ const CreateJob = () => {
         company: "",
         experience: ""
     });
+    
+    const [companyOption, setCompanyOption] = useState<'existing' | 'new'>('existing');
+    const [newCompanyName, setNewCompanyName] = useState('');
 
     const handleTextChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -56,14 +72,58 @@ const CreateJob = () => {
             [name]: value,
         }));
     };
+    
+
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        
+        // Validate that a company is selected or created
+        if (companyOption === 'existing' && !formData.company) {
+            toast.error("Please select a company");
+            return;
+        }
+        
+        if (companyOption === 'new' && !newCompanyName.trim()) {
+            toast.error("Please enter a company name");
+            return;
+        }
+        
+        // If creating a new company, create it first
+        let companyId = formData.company;
+        if (companyOption === 'new' && newCompanyName.trim()) {
+            try {
+                const res = await axiosInstance.post(
+                    `/company/register`,
+                    { companyName: newCompanyName },
+                    {
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        withCredentials: true,
+                    }
+                );
+                
+                if (res.data.success) {
+                    companyId = res.data.company._id;
+                    toast.success("Company created successfully");
+                }
+            } catch (error: any) {
+                console.error("Error creating company:", error);
+                toast.error(error.response?.data?.message || "Failed to create company");
+                return;
+            }
+        }
 
         try {
+            const jobData = {
+                ...formData,
+                company: companyId
+            };
+            
             const res = await axiosInstance.post(
                 `/job/post`,
-                formData,
+                jobData,
                 {
                     headers: {
                         "Content-Type": "application/json",
@@ -95,6 +155,8 @@ const CreateJob = () => {
                             Create New Job
                         </Typography>
                     </Stack>
+                    
+
 
                     <Box component="form" onSubmit={handleSubmit}>
                         <Stack spacing={2.5}>
@@ -190,39 +252,61 @@ const CreateJob = () => {
                                     fullWidth
                                 />
 
-                                {companies && companies.length > 0 ? (
-                                    <FormControl fullWidth required>
-                                        <InputLabel id="company-label">Company</InputLabel>
-                                        <Select
-                                            labelId="company-label"
-                                            label="Company"
-                                            name="company"
-                                            value={formData.company}
-                                            onChange={handleCompanyChange}
-                                        >
-                                            <MenuItem value="">
-                                                <em>Select Company</em>
-                                            </MenuItem>
-                                            {companies.map((company: any) => (
-                                                <MenuItem key={company._id} value={company._id}>
-                                                    {company.name}
+                                <FormControl fullWidth required>
+                                    <FormLabel component="legend">Company/Organization</FormLabel>
+                                    <RadioGroup
+                                        row
+                                        value={companyOption}
+                                        onChange={(e) => setCompanyOption(e.target.value as 'existing' | 'new')}
+                                    >
+                                        <FormControlLabel value="existing" control={<Radio />} label="Select Existing Company" />
+                                        <FormControlLabel value="new" control={<Radio />} label="Add New Company" />
+                                    </RadioGroup>
+                                </FormControl>
+                                
+                                {companyOption === 'existing' ? (
+                                    companies && companies.length > 0 ? (
+                                        <FormControl fullWidth required>
+                                            <InputLabel id="company-label">Select Company</InputLabel>
+                                            <Select
+                                                labelId="company-label"
+                                                label="Select Company"
+                                                name="company"
+                                                value={formData.company}
+                                                onChange={handleCompanyChange}
+                                            >
+                                                <MenuItem value="">
+                                                    <em>Select Company</em>
                                                 </MenuItem>
-                                            ))}
-                                        </Select>
-                                    </FormControl>
+                                                {companies.map((company: any) => (
+                                                    <MenuItem key={company._id} value={company._id}>
+                                                        {company.name}
+                                                    </MenuItem>
+                                                ))}
+                                            </Select>
+                                        </FormControl>
+                                    ) : (
+                                        <Typography>No companies found. Please add a new company.</Typography>
+                                    )
                                 ) : (
                                     <TextField
-                                        label="Company"
-                                        name="company"
-                                        value={formData.company}
-                                        onChange={handleTextChange}
+                                        label="New Company Name"
+                                        value={newCompanyName}
+                                        onChange={(e) => setNewCompanyName(e.target.value)}
                                         required
                                         fullWidth
                                     />
                                 )}
+                                                                
+
                             </Stack>
 
-                            <Button type="submit" variant="contained" size="large">
+                            <Button 
+                                type="submit" 
+                                variant="contained" 
+                                size="large"
+                                disabled={!isRecruiter}
+                            >
                                 Create Job
                             </Button>
                         </Stack>

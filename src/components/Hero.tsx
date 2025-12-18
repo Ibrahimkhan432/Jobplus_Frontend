@@ -1,16 +1,37 @@
 import CategoryCarousel from "./CategoryCarousel";
 import ProfileCompletionBanner from "./global/ProfileCompletionBanner";
 import SearchBox from "./search-box";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Box, Button, Container, Paper, Stack, Typography } from "@mui/material";
-import { GraduationCap, Code2, Sparkles } from "lucide-react";
+import { Box, Button, Container, Paper, Stack, Typography, Chip } from "@mui/material";
+import { GraduationCap, Code2, Sparkles, Clock, Users, MapPin, DollarSign } from "lucide-react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
 function Hero() {
   const navigate = useNavigate();
   const { allJobs } = useSelector((store: any) => store.job);
+  const [showLatestJobPopup, setShowLatestJobPopup] = useState(false);
+  const [currentPopupJob, setCurrentPopupJob] = useState<any>(null);
+  const [popupIndex, setPopupIndex] = useState(0);
+
+  // Helper function to calculate days ago
+  const daysAgoFunction = useCallback((mongodbTime: any) => {
+    if (!mongodbTime) return null;
+    const createdAt = new Date(mongodbTime);
+    const time = createdAt.getTime();
+    if (Number.isNaN(time)) return null;
+    return Math.floor((Date.now() - time) / (1000 * 60 * 60 * 24));
+  }, []);
+
+  // Get latest jobs (within 6 days)
+  const latestJobs = useMemo(() => {
+    if (!allJobs || !Array.isArray(allJobs)) return [];
+    return allJobs.filter((job: any) => {
+      const daysAgo = daysAgoFunction(job?.createdAt);
+      return daysAgo !== null && daysAgo <= 6;
+    });
+  }, [allJobs, daysAgoFunction]);
 
   const headlineVariants = useMemo(
     () => [
@@ -44,11 +65,27 @@ function Hero() {
 
   useEffect(() => {
     const id = window.setInterval(() => {
-      // keep the interval alive for future use (e.g., announcements), but no carousel UI is shown now
-      // leaving this empty avoids user-visible motion noise in the hero
     }, 4500);
     return () => window.clearInterval(id);
   }, [slides.length]);
+
+  // Handle latest job popup rotation
+  useEffect(() => {
+    if (latestJobs.length > 0) {
+      const popupInterval = setInterval(() => {
+        setShowLatestJobPopup(true);
+        setCurrentPopupJob(latestJobs[popupIndex]);
+        
+        // Auto hide after 3 seconds
+        setTimeout(() => {
+          setShowLatestJobPopup(false);
+          setPopupIndex((prev) => (prev + 1) % latestJobs.length);
+        }, 6000);
+      }, 2000); 
+
+      return () => clearInterval(popupInterval);
+    }
+  }, [latestJobs, popupIndex]);
 
   useEffect(() => {
     const id = window.setInterval(() => {
@@ -69,6 +106,136 @@ function Hero() {
         </div>
 
         <Container maxWidth="lg" sx={{ position: "relative", py: { xs: 6, md: 10 } }}>
+          {/* Latest Job Popup */}
+          <AnimatePresence>
+            {showLatestJobPopup && currentPopupJob && (
+              <motion.div
+                initial={{ opacity: 0, y: -50, scale: 0.9 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -50, scale: 0.9 }}
+                transition={{ duration: 0.3 }}
+                style={{
+                  position: 'absolute',
+                  top: 20,
+                  right: 200,
+                  zIndex: 1000,
+                }}
+              >
+                <Paper
+                  elevation={6}
+                  sx={{
+                    p: 2,
+                    borderRadius: 2,
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                    backdropFilter: 'blur(10px)',
+                    border: '2px solid #1976d2',
+                    minWidth: 300,
+                    maxWidth: 350,
+                    cursor: 'pointer',
+                    position: 'absolute',
+                    overflow: 'hidden',
+                    '&::before': {
+                      content: '""',
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      height: '4px',
+                      background: 'linear-gradient(90deg, #1976d2, #2196f3, #1976d2)',
+                      animation: 'shine 2s infinite linear',
+                    },
+                    '@keyframes shine': {
+                      '0%': { backgroundPosition: '-200% 0' },
+                      '100%': { backgroundPosition: '200% 0' },
+                    },
+                  }}
+                  onClick={() => navigate(`/jobs?jobId=${currentPopupJob._id}`)}
+                >
+                  <Stack spacing={1}>
+                    <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
+                      <Chip 
+                        label="NEW" 
+                        size="small" 
+                        sx={{ 
+                          backgroundColor: '#1976d2', 
+                          color: 'white', 
+                          fontWeight: 'bold',
+                          height: '20px'
+                        }} 
+                      />
+                      <Stack direction="row" spacing={0.5}>
+                        <Chip 
+                          icon={<Clock size={14} />}
+                          label="Just Posted" 
+                          size="small" 
+                          variant="outlined"
+                          sx={{ 
+                            borderColor: '#1976d2',
+                            color: '#1976d2',
+                            fontWeight: 'bold',
+                            height: '20px'
+                          }} 
+                        />
+                        <Button 
+                          size="small" 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setShowLatestJobPopup(false);
+                          }}
+                          sx={{ 
+                            minWidth: 'auto', 
+                            padding: 0.5, 
+                            color: '#666',
+                            '&:hover': { backgroundColor: 'rgba(0,0,0,0.05)' }
+                          }}
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                          </svg>
+                        </Button>
+                      </Stack>
+                    </Stack>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#1a1a1a' }}>
+                      {currentPopupJob.title}
+                    </Typography>
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <MapPin size={14} color="#666" />
+                        <Typography variant="caption" sx={{ color: '#666' }}>
+                          {currentPopupJob.location}
+                        </Typography>
+                      </Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <DollarSign size={14} color="#666" />
+                        <Typography variant="caption" sx={{ color: '#666' }}>
+                          {currentPopupJob.salaryMin && currentPopupJob.salaryMax ? `₹${currentPopupJob.salaryMin.toLocaleString()} - ₹${currentPopupJob.salaryMax.toLocaleString()}` : 'Not specified'}
+                        </Typography>
+                      </Box>
+                    </Stack>
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <Users size={14} color="#666" />
+                      <Typography variant="caption" sx={{ color: '#666' }}>
+                        {currentPopupJob.company?.name || 'Company'}
+                      </Typography>
+                    </Stack>
+                    <Button 
+                      size="small" 
+                      variant="contained" 
+                      sx={{ 
+                        mt: 1, 
+                        backgroundColor: '#1976d2', 
+                        '&:hover': { backgroundColor: '#1565c0' },
+                        textTransform: 'none'
+                      }}
+                    >
+                      View Details
+                    </Button>
+                  </Stack>
+                </Paper>
+              </motion.div>
+            )}
+          </AnimatePresence>
           <Stack spacing={3} alignItems="center" textAlign="center">
             <motion.div
               initial={{ opacity: 0, y: 14 }}
@@ -82,6 +249,12 @@ function Hero() {
                   letterSpacing: -0.8,
                   color: "#fff",
                   textShadow: "0 10px 30px rgba(0,0,0,0.35)",
+                  position: 'relative',
+                  '@keyframes underlineAnimation': {
+                    '0%': { transform: 'scaleX(0)', opacity: 0 },
+                    '50%': { transform: 'scaleX(1)', opacity: 1 },
+                    '100%': { transform: 'scaleX(0)', opacity: 0, transformOrigin: 'right' },
+                  },
                 }}
               >
                 Find your{" "}
@@ -98,9 +271,25 @@ function Hero() {
                         background: "linear-gradient(90deg, #93C5FD, #22D3EE, #ffffff)",
                         WebkitBackgroundClip: "text",
                         color: "transparent",
+                        position: 'relative',
                       }}
                     >
                       {headlineVariants[headlineIndex]}
+                      <Box
+                        component="span"
+                        sx={{
+                          position: 'absolute',
+                          bottom: 0,
+                          left: 0,
+                          right: 0,
+                          height: '4px',
+                          background: 'linear-gradient(90deg, #93C5FD, #22D3EE, #ffffff)',
+                          borderRadius: '2px',
+                          transform: 'scaleX(0)',
+                          transformOrigin: 'left',
+                          animation: 'underlineAnimation 2s infinite',
+                        }}
+                      />
                     </motion.span>
                   </AnimatePresence>
                 </Box>
@@ -183,9 +372,31 @@ function Hero() {
                           }}
                         >
                           <Stack spacing={0.75}>
-                            <Typography variant="subtitle2" sx={{ fontWeight: 900, lineHeight: 1.2 }}>
-                              {job?.title || "New opportunity"}
-                            </Typography>
+                            <Stack direction="row" spacing={1} alignItems="center">
+                              <Typography variant="subtitle2" sx={{ fontWeight: 900, lineHeight: 1.2, flex: 1 }}>
+                                {job?.title || "New opportunity"}
+                              </Typography>
+                              {/* Show NEW badge for jobs less than 6 days old */}
+                              {(() => {
+                                const daysAgo = daysAgoFunction(job?.createdAt);
+                                if (daysAgo !== null && daysAgo <= 6) {
+                                  return (
+                                    <Chip 
+                                      label="NEW" 
+                                      size="small" 
+                                      sx={{ 
+                                        backgroundColor: '#1976d2', 
+                                        color: 'white', 
+                                        fontWeight: 'bold',
+                                        height: '18px',
+                                        fontSize: '0.65rem'
+                                      }} 
+                                    />
+                                  );
+                                }
+                                return null;
+                              })()}
+                            </Stack>
                             <Typography variant="caption" sx={{ color: "rgba(255,255,255,0.75)" }}>
                               {job?.company?.name || "Organization"} · {job?.location || "On-site / Remote"}
                             </Typography>

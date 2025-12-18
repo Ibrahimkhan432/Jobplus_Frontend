@@ -32,6 +32,8 @@ export default function CategoryCarousel() {
   const scrollRef = useRef<HTMLDivElement>(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(true)
+  const autoScrollInterval = useRef<NodeJS.Timeout | null>(null)
+  const [isHovering, setIsHovering] = useState(false)
 
   const categories: Category[] = [
     { id: "frontend", name: "Frontend Developer", icon: <Code className="h-6 w-6" />, count: 842 },
@@ -67,10 +69,51 @@ export default function CategoryCarousel() {
     }
   }, [])
 
+  // Auto-scroll continuously from right to left
+  useEffect(() => {
+    // Initialize carousel to start from the rightmost position
+    setTimeout(() => {
+      if (scrollRef.current) {
+        scrollRef.current.scrollLeft = scrollRef.current.scrollWidth;
+      }
+    }, 3000);
+    
+    const startAutoScroll = () => {
+      if (autoScrollInterval.current) {
+        clearInterval(autoScrollInterval.current)
+      }
+      
+      autoScrollInterval.current = setInterval(() => {
+        // Only scroll if not hovering
+        if (!isHovering && scrollRef.current) {
+          // Check if we're at the beginning and loop back to the end if needed
+          const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current
+          if (scrollLeft <= 0) {
+            // Jump to near the end to create a continuous loop effect
+            scrollRef.current.scrollLeft = scrollWidth - clientWidth - 200
+          }
+          
+          // Scroll left by a smaller amount to create slower right-to-left movement
+          scrollRef.current.scrollBy({ left: 150, behavior: 'smooth' })
+        }
+      }, 2000) // Scroll every 3 seconds
+    }
+
+    // Start auto-scroll after a delay
+    const autoScrollTimer = setTimeout(startAutoScroll, 2000)
+
+    return () => {
+      if (autoScrollInterval.current) {
+        clearInterval(autoScrollInterval.current)
+      }
+      clearTimeout(autoScrollTimer)
+    }
+  }, [])
+
   const scroll = (direction: "left" | "right") => {
     if (scrollRef.current) {
       const { clientWidth } = scrollRef.current
-      const scrollAmount = clientWidth * 0.8
+      const scrollAmount = clientWidth * 20
       scrollRef.current.scrollBy({
         left: direction === "left" ? -scrollAmount : scrollAmount,
         behavior: "smooth",
@@ -116,7 +159,13 @@ export default function CategoryCarousel() {
         </Box>
       </Box>
 
-      <Box ref={scrollRef} className="scrollbar-hide" sx={{ display: "flex", overflowX: "auto", gap: 2, pb: 1.5, px: 0.5 }}>
+      <Box 
+        ref={scrollRef} 
+        className="scrollbar-hide" 
+        sx={{ display: "flex", overflowX: "auto", gap: 2, pb: 1.5, px: 0.5 }}
+        onMouseEnter={() => setIsHovering(true)}
+        onMouseLeave={() => setIsHovering(false)}
+      >
         {categories.map((category, idx) => (
           <Link key={category.id} to={`/jobs?category=${category.id}`} className="flex-shrink-0">
             <motion.div

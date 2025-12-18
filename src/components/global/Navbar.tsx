@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { User, LogOut, Menu as MenuIcon, Bell } from "lucide-react";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -176,17 +176,32 @@ export default function Navbar({ variant = "default" }: { variant?: NavbarVarian
                 alignItems: "center",
               }}
             >
-              <>
-                <Button component={RouterLink} to="/" color="primary" sx={{ textTransform: "none" }}>
-                  Home
-                </Button>
-                <Button component={RouterLink} to="/jobs" color="primary" sx={{ textTransform: "none" }}>
-                  Jobs
-                </Button>
-                <Button component={RouterLink} to="/browser" color="primary" sx={{ textTransform: "none" }}>
-                  Browser
-                </Button>
-              </>
+              <React.Fragment>
+                {user?.role === "recruiter" ? (
+                  // Recruiter-specific navigation
+                  <React.Fragment>
+                    <Button component={RouterLink} to="/recruiter/dashboard" color="primary" sx={{ textTransform: "none" }}>
+                      Dashboard
+                    </Button>
+                    <Button component={RouterLink} to="/recruiter/dashboard" color="primary" sx={{ textTransform: "none" }}>
+                      Posted Jobs
+                    </Button>
+                  </React.Fragment>
+                ) : (
+                  // Regular user navigation
+                  <React.Fragment>
+                    <Button component={RouterLink} to="/" color="primary" sx={{ textTransform: "none" }}>
+                      Home
+                    </Button>
+                    <Button component={RouterLink} to="/jobs" color="primary" sx={{ textTransform: "none" }}>
+                      Jobs
+                    </Button>
+                    <Button component={RouterLink} to="/browser" color="primary" sx={{ textTransform: "none" }}>
+                      Browser
+                    </Button>
+                  </React.Fragment>
+                )}
+              </React.Fragment>
             </Box>
 
             {/* Right side - User Actions */}
@@ -392,48 +407,79 @@ export default function Navbar({ variant = "default" }: { variant?: NavbarVarian
           </Box>
           <Divider />
           <List>
-            <>
-              <ListItemButton 
-                component={RouterLink} 
-                to="/" 
-                onClick={() => setIsOpen(false)}
-                sx={{
-                  "&:hover": {
-                    backgroundColor: "rgba(25, 118, 210, 0.08)",
-                  }
-                }}
-              >
-                <ListItemText primary="Home" />
-              </ListItemButton>
-              <ListItemButton 
-                component={RouterLink} 
-                to="/jobs" 
-                onClick={() => setIsOpen(false)}
-                sx={{
-                  "&:hover": {
-                    backgroundColor: "rgba(25, 118, 210, 0.08)",
-                  }
-                }}
-              >
-                <ListItemText primary="Jobs" />
-              </ListItemButton>
-              <ListItemButton 
-                component={RouterLink} 
-                to="/browser" 
-                onClick={() => setIsOpen(false)}
-                sx={{
-                  "&:hover": {
-                    backgroundColor: "rgba(25, 118, 210, 0.08)",
-                  }
-                }}
-              >
-                <ListItemText primary="Browser" />
-              </ListItemButton>
-            </>
+            {user?.role === "recruiter" ? (
+              // Recruiter-specific navigation
+              <React.Fragment>
+                <ListItemButton 
+                  component={RouterLink} 
+                  to="/recruiter/dashboard" 
+                  onClick={() => setIsOpen(false)}
+                  sx={{
+                    "&:hover": {
+                      backgroundColor: "rgba(25, 118, 210, 0.08)",
+                    }
+                  }}
+                >
+                  <ListItemText primary="Dashboard" />
+                </ListItemButton>
+                <ListItemButton 
+                  component={RouterLink} 
+                  to="/recruiter/dashboard" 
+                  onClick={() => setIsOpen(false)}
+                  sx={{
+                    "&:hover": {
+                      backgroundColor: "rgba(25, 118, 210, 0.08)",
+                    }
+                  }}
+                >
+                  <ListItemText primary="Posted Jobs" />
+                </ListItemButton>
+              </React.Fragment>
+            ) : (
+              // Regular user navigation
+              <React.Fragment>
+                <ListItemButton 
+                  component={RouterLink} 
+                  to="/" 
+                  onClick={() => setIsOpen(false)}
+                  sx={{
+                    "&:hover": {
+                      backgroundColor: "rgba(25, 118, 210, 0.08)",
+                    }
+                  }}
+                >
+                  <ListItemText primary="Home" />
+                </ListItemButton>
+                <ListItemButton 
+                  component={RouterLink} 
+                  to="/jobs" 
+                  onClick={() => setIsOpen(false)}
+                  sx={{
+                    "&:hover": {
+                      backgroundColor: "rgba(25, 118, 210, 0.08)",
+                    }
+                  }}
+                >
+                  <ListItemText primary="Jobs" />
+                </ListItemButton>
+                <ListItemButton 
+                  component={RouterLink} 
+                  to="/browser" 
+                  onClick={() => setIsOpen(false)}
+                  sx={{
+                    "&:hover": {
+                      backgroundColor: "rgba(25, 118, 210, 0.08)",
+                    }
+                  }}
+                >
+                  <ListItemText primary="Browser" />
+                </ListItemButton>
+              </React.Fragment>
+            )}
           </List>
 
           {!user ? (
-            <>
+            <React.Fragment>
               <Divider />
               <List>
                 <ListItemButton 
@@ -467,7 +513,7 @@ export default function Navbar({ variant = "default" }: { variant?: NavbarVarian
                   />
                 </ListItemButton>
               </List>
-            </>
+            </React.Fragment>
           ) : null}
         </Box>
       </Drawer>
