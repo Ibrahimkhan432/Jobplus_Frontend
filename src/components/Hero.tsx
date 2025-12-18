@@ -434,13 +434,14 @@ function Hero() {
                 Browse Jobs
               </Button>
               <Button
-                variant="outlined"
+                variant="contained"
                 href="/signup"
                 sx={{
                   textTransform: "none",
                   borderColor: "rgba(255,255,255,0.55)",
-                  color: "#fff",
-                  "&:hover": { borderColor: "rgba(255,255,255,0.85)", backgroundColor: "rgba(255,255,255,0.10)" },
+                  backgroundColor: "rgba(255, 255, 255, 0.94)",
+                  color: "#000",
+                  "&:hover": { borderColor: "rgba(255,255,255,0.85)", backgroundColor: "rgba(245, 240, 240, 0.85)" },
                 }}
               >
                 Create Profile

@@ -14,6 +14,8 @@ import {
   FormControl,
   FormControlLabel,
   FormLabel,
+  IconButton,
+  InputAdornment,
   Paper,
   Radio,
   RadioGroup,
@@ -21,6 +23,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function Signup() {
   const [input, setInput] = useState({
@@ -31,6 +34,7 @@ export default function Signup() {
     phoneNumber: "",
     role: "",
   });
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
@@ -123,13 +127,26 @@ export default function Signup() {
                   <TextField
                     id="password"
                     name="password"
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     label="Password"
                     placeholder="••••••••"
                     value={input.password}
                     onChange={handleChange}
                     required
                     fullWidth
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            aria-label="toggle password visibility"
+                            onClick={() => setShowPassword(!showPassword)}
+                            edge="end"
+                          >
+                            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
                   />
 
                   <TextField
