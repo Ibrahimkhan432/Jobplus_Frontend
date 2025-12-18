@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import Navbar from "@/components/global/Navbar";
@@ -8,14 +8,10 @@ import axiosInstance from "@/utils/axios";
 import useGetAllCompanies from "@/hooks/useGetAllCompanies";
 
 import {
-    Alert,
+    
     Box,
     Button,
     Container,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
     FormControl,
     FormControlLabel,
     FormLabel,

@@ -4,7 +4,7 @@ import SearchBox from "./search-box";
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Box, Button, Container, Paper, Stack, Typography, Chip } from "@mui/material";
-import { GraduationCap, Code2, Sparkles, Clock, Users, MapPin, DollarSign } from "lucide-react";
+import { Sparkles, Clock, Users, MapPin, DollarSign } from "lucide-react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
