@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
 import { setUser } from "../../../redux/authSlice";
 import axiosInstance from "@/utils/axios";
+import ProfileCompletionBanner from "./ProfileCompletionBanner";
 import {
   markAllReadLocal,
   markNotificationReadLocal,
@@ -92,20 +93,21 @@ export default function Navbar({ variant = "default" }: { variant?: NavbarVarian
   };
 
   return (
-    <AppBar
-      position="sticky"
-      sx={{
-        boxShadow: "none",
-        backgroundColor: "transparent",
-        color: isLanding ? "#fff" : "text.primary",
-        backdropFilter: "none",
-        borderBottom: "none",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-
-      }}
-    >
+    <>
+      <ProfileCompletionBanner />
+      <AppBar
+        position="sticky"
+        sx={{
+          boxShadow: "none",
+          backgroundColor: "transparent",
+          color: isLanding ? "#fff" : "text.primary",
+          backdropFilter: "none",
+          borderBottom: "none",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
       <Box
         sx={{
           width: "90%",
@@ -518,5 +520,6 @@ export default function Navbar({ variant = "default" }: { variant?: NavbarVarian
         </Box>
       </Drawer>
     </AppBar>
+    </>
   );
 }

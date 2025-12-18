@@ -80,7 +80,7 @@ export default function Signup() {
     }
   };
   return (
-    <div className="min-h-screen flex flex-col bgMain-gradient">
+    <div className="min-h-screen flex flex-col bg-gray-100">
       <Navbar />
       <Box sx={{ flex: 1, display: "flex", alignItems: "center" }}>
         <Container maxWidth="sm" sx={{ py: 4 }}>

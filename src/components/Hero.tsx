@@ -1,10 +1,9 @@
 import CategoryCarousel from "./CategoryCarousel";
-import ProfileCompletionBanner from "./global/ProfileCompletionBanner";
 import SearchBox from "./search-box";
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Box, Button, Container, Paper, Stack, Typography, Chip } from "@mui/material";
-import { Sparkles, Clock, Users, MapPin, DollarSign } from "lucide-react";
+import { Sparkles, Clock, Users, MapPin } from "lucide-react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
@@ -69,19 +68,18 @@ function Hero() {
     return () => window.clearInterval(id);
   }, [slides.length]);
 
-  // Handle latest job popup rotation
+
   useEffect(() => {
     if (latestJobs.length > 0) {
       const popupInterval = setInterval(() => {
         setShowLatestJobPopup(true);
         setCurrentPopupJob(latestJobs[popupIndex]);
-        
-        // Auto hide after 3 seconds
+
         setTimeout(() => {
           setShowLatestJobPopup(false);
           setPopupIndex((prev) => (prev + 1) % latestJobs.length);
-        }, 6000);
-      }, 2000); 
+        }, 3000);
+      }, 2000);
 
       return () => clearInterval(popupInterval);
     }
@@ -96,7 +94,6 @@ function Hero() {
 
   return (
     <div className="min-h-screen">
-      <ProfileCompletionBanner />
       {/* Hero Section with Background Image and Integrated Navbar */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0">
@@ -153,38 +150,38 @@ function Hero() {
                 >
                   <Stack spacing={1}>
                     <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
-                      <Chip 
-                        label="NEW" 
-                        size="small" 
-                        sx={{ 
-                          backgroundColor: '#1976d2', 
-                          color: 'white', 
+                      <Chip
+                        label="NEW"
+                        size="small"
+                        sx={{
+                          backgroundColor: '#1976d2',
+                          color: 'white',
                           fontWeight: 'bold',
                           height: '20px'
-                        }} 
+                        }}
                       />
                       <Stack direction="row" spacing={0.5}>
-                        <Chip 
+                        <Chip
                           icon={<Clock size={14} />}
-                          label="Just Posted" 
-                          size="small" 
+                          label="Just Posted"
+                          size="small"
                           variant="outlined"
-                          sx={{ 
+                          sx={{
                             borderColor: '#1976d2',
                             color: '#1976d2',
                             fontWeight: 'bold',
                             height: '20px'
-                          }} 
+                          }}
                         />
-                        <Button 
-                          size="small" 
+                        <Button
+                          size="small"
                           onClick={(e) => {
                             e.stopPropagation();
                             setShowLatestJobPopup(false);
                           }}
-                          sx={{ 
-                            minWidth: 'auto', 
-                            padding: 0.5, 
+                          sx={{
+                            minWidth: 'auto',
+                            padding: 0.5,
                             color: '#666',
                             '&:hover': { backgroundColor: 'rgba(0,0,0,0.05)' }
                           }}
@@ -207,9 +204,9 @@ function Hero() {
                         </Typography>
                       </Box>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                        <DollarSign size={14} color="#666" />
-                        <Typography variant="caption" sx={{ color: '#666' }}>
-                          {currentPopupJob.salaryMin && currentPopupJob.salaryMax ? `₹${currentPopupJob.salaryMin.toLocaleString()} - ₹${currentPopupJob.salaryMax.toLocaleString()}` : 'Not specified'}
+                          <Typography variant="caption" sx={{ color: '#666' }}>
+                          Rs 
+                            {currentPopupJob.salaryMin && currentPopupJob.salaryMax ? `${currentPopupJob.salaryMin.toLocaleString()} - ${currentPopupJob.salaryMax.toLocaleString()}` : 'Not specified'}
                         </Typography>
                       </Box>
                     </Stack>
@@ -219,12 +216,12 @@ function Hero() {
                         {currentPopupJob.company?.name || 'Company'}
                       </Typography>
                     </Stack>
-                    <Button 
-                      size="small" 
-                      variant="contained" 
-                      sx={{ 
-                        mt: 1, 
-                        backgroundColor: '#1976d2', 
+                    <Button
+                      size="small"
+                      variant="contained"
+                      sx={{
+                        mt: 1,
+                        backgroundColor: '#1976d2',
                         '&:hover': { backgroundColor: '#1565c0' },
                         textTransform: 'none'
                       }}
@@ -381,16 +378,16 @@ function Hero() {
                                 const daysAgo = daysAgoFunction(job?.createdAt);
                                 if (daysAgo !== null && daysAgo <= 6) {
                                   return (
-                                    <Chip 
-                                      label="NEW" 
-                                      size="small" 
-                                      sx={{ 
-                                        backgroundColor: '#1976d2', 
-                                        color: 'white', 
+                                    <Chip
+                                      label="NEW"
+                                      size="small"
+                                      sx={{
+                                        backgroundColor: '#1976d2',
+                                        color: 'white',
                                         fontWeight: 'bold',
                                         height: '18px',
                                         fontSize: '0.65rem'
-                                      }} 
+                                      }}
                                     />
                                   );
                                 }
@@ -450,7 +447,7 @@ function Hero() {
               </Button>
             </Stack>
 
-         
+
           </Stack>
         </Container>
       </section>

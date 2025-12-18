@@ -21,22 +21,23 @@ function ProfileCompletionBanner() {
     if (completion === 100) return null;
 
     return (
-        <div className="fixed top-14 right-2 z-50 bg-yellow-100 border border-yellow-400 rounded-xl w-80 h-44 p-5 shadow-2xl flex flex-col justify-between">
-            <div className="flex flex-col gap-2 overflow-hidden">
-                <span className="text-yellow-800 font-bold text-lg">
-                    Profile {completion}% Complete 🎉
-                </span>
-                <p className="text-yellow-800 text-sm leading-snug">
-                    Complete your profile to get the best job matches and recommendations.
-                </p>
+        <div className="w-full bg-yellow-100 border-b border-yellow-400  px-4 shadow-md p-1">
+            <div className="max-w-4xl mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                    <span className="text-yellow-800 font-bold">
+                        Profile {completion}% Complete 🎉
+                    </span>
+                    <p className="text-yellow-800 text-sm">
+                        Complete your profile to get the best job matches and recommendations.
+                    </p>
+                </div>
+                <a
+                    href="/profile"
+                    className="text-center bg-yellow-500 text-white font-semibold px-4  rounded-lg hover:bg-yellow-600 transition whitespace-nowrap"
+                >
+                    Complete Profile
+                </a>
             </div>
-
-            <a
-                href="/profile"
-                className="mt-3 text-center bg-yellow-500 text-white font-semibold py-2 rounded-lg hover:bg-yellow-600 transition"
-            >
-                Complete Profile
-            </a>
         </div>
     );
 }
