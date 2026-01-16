@@ -4,7 +4,7 @@ import React from "react";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  allowedRoles?: string[]; // Optional: restrict by role
+  allowedRoles?: string[]; 
 }
 
 const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {

@@ -38,7 +38,7 @@ function Profile() {
     bio: user?.profile?.bio || "",
     skills: user?.profile?.skills ? user.profile.skills.join(", ") : "",
     file: null as File | null,
-    profilePhoto: user?.profile?.profilePhoto || ""
+    profilePhoto: user?.profile?.profilePhoto || "",
   });
 
   React.useEffect(() => {
@@ -49,7 +49,7 @@ function Profile() {
       bio: user?.profile?.bio || "",
       skills: user?.profile?.skills ? user.profile.skills.join(", ") : "",
       file: null,
-      profilePhoto: user?.profile?.profilePhoto || ""
+      profilePhoto: user?.profile?.profilePhoto || "",
     });
   }, [user]);
 
@@ -74,24 +74,20 @@ function Profile() {
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setForm(prev => ({
+      setForm((prev) => ({
         ...prev,
         profilePhoto: URL.createObjectURL(e.target.files![0]),
-        file: e.target.files![0]
+        file: e.target.files![0],
       }));
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
-
-  // const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   if (e.target.files && e.target.files[0]) {
-  //     setForm(prev => ({ ...prev, file: e.target.files![0] }));
-  //   }
-  // };
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
@@ -103,7 +99,7 @@ function Profile() {
         return;
       }
 
-      setForm(prev => ({ ...prev, file }));
+      setForm((prev) => ({ ...prev, file }));
     }
   };
 
@@ -118,23 +114,19 @@ function Profile() {
       formData.append("skills", form.skills);
 
       if (form.file) {
-        if (form.file.type.startsWith('image/')) {
+        if (form.file.type.startsWith("image/")) {
           formData.append("profilePhoto", form.file); // for photo
         } else {
           formData.append("file", form.file); // for resume
         }
       }
 
-      const res = await axiosInstance.post(
-        `/user/profile/update`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-          withCredentials: true,
-        }
-      );
+      const res = await axiosInstance.post(`/user/profile/update`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        withCredentials: true,
+      });
       console.log("res in profile update", res.data);
 
       if (res.data.success) {
@@ -143,7 +135,7 @@ function Profile() {
         setEditMode(false);
       }
     } catch (error) {
-      console.log("error while updating profile",error)
+      console.log("error while updating profile", error);
       toast.error("Something went wrong while updating profile");
     } finally {
       setLoading(false);
@@ -158,7 +150,7 @@ function Profile() {
       bio: user?.profile?.bio || "",
       skills: user?.profile?.skills ? user.profile.skills.join(", ") : "",
       file: null,
-      profilePhoto: user?.profile?.profilePhoto || ""
+      profilePhoto: user?.profile?.profilePhoto || "",
     });
     setEditMode(false);
   };
@@ -168,8 +160,15 @@ function Profile() {
       <Navbar />
       <Container maxWidth="lg" sx={{ py: 4 }}>
         <Stack spacing={3}>
-          <Paper variant="outlined" sx={{ p: { xs: 2, sm: 3 }, borderRadius: 2 }}>
-            <Stack direction={{ xs: "column", sm: "row" }} spacing={3} alignItems={{ sm: "center" }}>
+          <Paper
+            variant="outlined"
+            sx={{ p: { xs: 2, sm: 3 }, borderRadius: 2 }}
+          >
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              spacing={3}
+              alignItems={{ sm: "center" }}
+            >
               <Box sx={{ position: "relative", width: 96, height: 96 }}>
                 <Avatar
                   src={
@@ -239,21 +238,37 @@ function Profile() {
                 </Box>
               </Box>
 
-              <Box sx={{ display: "flex", gap: 1, justifyContent: { xs: "stretch", sm: "flex-end" } }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  gap: 1,
+                  justifyContent: { xs: "stretch", sm: "flex-end" },
+                }}
+              >
                 {!editMode ? (
                   <>
                     {user && user.role === "recruiter" ? (
-                      <Button variant="outlined" onClick={() => navigate("/recruiter/dashboard")}>
+                      <Button
+                        variant="outlined"
+                        onClick={() => navigate("/recruiter/dashboard")}
+                      >
                         Recruiter Dashboard
                       </Button>
                     ) : null}
-                    <Button variant="contained" onClick={() => setEditMode(true)}>
+                    <Button
+                      variant="contained"
+                      onClick={() => setEditMode(true)}
+                    >
                       Edit Profile
                     </Button>
                   </>
                 ) : (
                   <>
-                    <Button variant="contained" onClick={handleSave} disabled={loading}>
+                    <Button
+                      variant="contained"
+                      onClick={handleSave}
+                      disabled={loading}
+                    >
                       {loading ? "Saving..." : "Save"}
                     </Button>
                     <Button variant="outlined" onClick={handleCancel}>
@@ -265,10 +280,18 @@ function Profile() {
             </Stack>
           </Paper>
 
-          <Paper variant="outlined" sx={{ p: { xs: 2, sm: 3 }, borderRadius: 2 }}>
+          <Paper
+            variant="outlined"
+            sx={{ p: { xs: 2, sm: 3 }, borderRadius: 2 }}
+          >
             <Stack spacing={2}>
               <Box>
-                <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
+                <Stack
+                  direction="row"
+                  alignItems="center"
+                  justifyContent="space-between"
+                  sx={{ mb: 1 }}
+                >
                   <Typography variant="h6" sx={{ fontWeight: 800 }}>
                     Profile completion
                   </Typography>
@@ -276,15 +299,29 @@ function Profile() {
                     {filledFields}/{totalFields} fields
                   </Typography>
                 </Stack>
-                <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
-                  <Typography variant="body2" color={isProfileComplete ? "success.main" : "warning.main"}>
-                    {isProfileComplete ? "Profile complete!" : `${completion}% complete`}
+                <Stack
+                  direction="row"
+                  alignItems="center"
+                  justifyContent="space-between"
+                  sx={{ mb: 1 }}
+                >
+                  <Typography
+                    variant="body2"
+                    color={isProfileComplete ? "success.main" : "warning.main"}
+                  >
+                    {isProfileComplete
+                      ? "Profile complete!"
+                      : `${completion}% complete`}
                   </Typography>
                 </Stack>
                 <LinearProgress
                   variant="determinate"
                   value={completion}
-                  sx={{ height: 8, borderRadius: 999, backgroundColor: "rgba(0,0,0,0.08)" }}
+                  sx={{
+                    height: 8,
+                    borderRadius: 999,
+                    backgroundColor: "rgba(0,0,0,0.08)",
+                  }}
                 />
               </Box>
 
@@ -294,7 +331,7 @@ function Profile() {
                 <TextField
                   label="Email"
                   name="email"
-                  value={editMode ? form.email : (user?.email || "")}
+                  value={editMode ? form.email : user?.email || ""}
                   onChange={handleChange}
                   fullWidth
                   size="small"
@@ -303,7 +340,7 @@ function Profile() {
                 <TextField
                   label="Phone"
                   name="phoneNumber"
-                  value={editMode ? form.phoneNumber : (user?.phoneNumber || "")}
+                  value={editMode ? form.phoneNumber : user?.phoneNumber || ""}
                   onChange={handleChange}
                   fullWidth
                   size="small"
@@ -322,13 +359,27 @@ function Profile() {
                   />
                 ) : (
                   <Box>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>
+                    <Typography
+                      variant="subtitle2"
+                      sx={{ fontWeight: 700, mb: 1 }}
+                    >
                       Skills
                     </Typography>
-                    <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
-                      {user?.profile?.skills && user.profile.skills.length > 0 ? (
+                    <Stack
+                      direction="row"
+                      spacing={1}
+                      useFlexGap
+                      flexWrap="wrap"
+                    >
+                      {user?.profile?.skills &&
+                      user.profile.skills.length > 0 ? (
                         user.profile.skills.map((s: string, idx: number) => (
-                          <Chip key={`${s}-${idx}`} label={s} size="small" variant="outlined" />
+                          <Chip
+                            key={`${s}-${idx}`}
+                            label={s}
+                            size="small"
+                            variant="outlined"
+                          />
                         ))
                       ) : (
                         <Typography variant="body2" color="text.secondary">
@@ -340,13 +391,22 @@ function Profile() {
                 )}
 
                 <Box>
-                  <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{ fontWeight: 700, mb: 1 }}
+                  >
                     Resume
                   </Typography>
                   {editMode ? (
                     <Button component="label" variant="outlined">
                       Upload resume (PDF)
-                      <input type="file" hidden name="file" onChange={handleFileChange} accept=".pdf" />
+                      <input
+                        type="file"
+                        hidden
+                        name="file"
+                        onChange={handleFileChange}
+                        accept=".pdf"
+                      />
                     </Button>
                   ) : user?.profile?.resume ? (
                     <Button
@@ -370,7 +430,10 @@ function Profile() {
           </Paper>
 
           {user && user.role === "student" ? (
-            <Paper variant="outlined" sx={{ p: { xs: 2, sm: 3 }, borderRadius: 2 }}>
+            <Paper
+              variant="outlined"
+              sx={{ p: { xs: 2, sm: 3 }, borderRadius: 2 }}
+            >
               <Typography variant="h6" sx={{ fontWeight: 800, mb: 2 }}>
                 Applied Jobs
               </Typography>
