@@ -44,15 +44,12 @@ function Jobs() {
   const [visibleCount, setVisibleCount] = useState(12);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
-  // Fetch all jobs when component mounts
   useGetAllJobs();
 
   const filteredJobs = useMemo(() => {
     return allJobs?.filter((job: any) => {
-      // If no filters, show all jobs
       if (!filters || Object.keys(filters).length === 0) return true;
 
-      // Check each filter type
       const locationMatch = filters.Location
         ? job.location?.toLowerCase() === filters.Location.toLowerCase()
         : true;
