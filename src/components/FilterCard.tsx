@@ -42,7 +42,6 @@ function FilterCard({ onFilterChange }: FilterCardProps) {
   const [selectedFilters, setSelectedFilters] = useState<{ [key: string]: string }>({});
 
   const handleRadioClick = (filterType: string, value: string) => {
-    // If already selected, remove filter
     const isSelected = selectedFilters[filterType] === value;
     const updatedFilters = { ...selectedFilters };
     if (isSelected) {
