@@ -1,4 +1,3 @@
-import type React from "react";
 import { useEffect, useState } from "react";
 import Navbar from "../../../components/global/Navbar";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -6,6 +5,11 @@ import { toast } from "sonner";
 import { useDispatch, useSelector } from "react-redux";
 import { setLoadnig, setUser } from "./../../../../redux/authSlice";
 import axiosInstance from "../../../utils/axios";
+
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { loginSchema, type LoginFormData } from "@/validators/auth.schema";
+
 import {
   Box,
   Button,
@@ -21,102 +25,94 @@ import {
 import { Eye, EyeOff } from "lucide-react";
 
 export default function Login() {
-  const [input, setInput] = useState({
-    email: "",
-    password: "",
-  });
   const [showPassword, setShowPassword] = useState(false);
-  console.log("input", input);
 
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
   const { loading, user } = useSelector((store: any) => store.auth);
 
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+  });
+
   useEffect(() => {
-    if (user && user.email) {
+    if (user?.email) {
       const from = (location.state as any)?.from;
       const fromPath = typeof from === "string" ? from : from?.pathname;
       navigate(fromPath || "/", { replace: true });
     }
   }, [user, navigate, location.state]);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setInput((input) => ({ ...input, [name]: value }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (data: LoginFormData) => {
     try {
       dispatch(setLoadnig(true));
-      const res = await axiosInstance.post(`/user/login`, input);
+
+      const res = await axiosInstance.post("/user/login", data, {
+        withCredentials: true,
+      });
+
       if (res.data.success) {
-        localStorage.setItem("token", res.data.token)
+        localStorage.setItem("token", res.data.token);
         dispatch(setUser(res.data.user));
         toast.success("Login successful");
+
         const from = (location.state as any)?.from;
         const fromPath = typeof from === "string" ? from : from?.pathname;
         navigate(fromPath || "/");
       }
-    } catch (error) {
-      console.error("Error during Login:", error);
-      toast.error("Login failed. Please check your credentials.");
-      dispatch(setLoadnig(false));
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || "Login failed");
     } finally {
       dispatch(setLoadnig(false));
     }
-    console.log("login submitted:", input);
   };
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-100">
       <Navbar />
+
       <Box sx={{ flex: 1, display: "flex", alignItems: "center" }}>
         <Container maxWidth="sm" sx={{ py: 4 }}>
-          <Paper elevation={8} sx={{ p: { xs: 3, sm: 4 }, borderRadius: 4, bgcolor: "rgba(255,255,255,0.92)" }}>
+          <Paper elevation={8} sx={{ p: 4, borderRadius: 4 }}>
             <Stack spacing={3}>
-              <Box textAlign="center">
-                <Typography variant="h4" sx={{ fontWeight: 800 }}>
-                  Login an Account
-                </Typography>
-              </Box>
+              <Typography variant="h4" fontWeight={800} textAlign="center">
+                Login to your account
+              </Typography>
 
-              <Box component="form" onSubmit={handleSubmit}>
+              <Box component="form" onSubmit={handleSubmit(onSubmit)}>
                 <Stack spacing={2}>
                   <TextField
-                    id="email"
-                    name="email"
-                    type="email"
                     label="Email"
-                    placeholder="name@example.com"
-                    value={input.email}
-                    onChange={handleChange}
-                    required
+                    type="email"
+                    {...register("email")}
+                    error={!!errors.email}
+                    helperText={errors.email?.message}
                     fullWidth
                   />
 
                   <TextField
-                    id="password"
-                    name="password"
-                    type={showPassword ? "text" : "password"}
                     label="Password"
-                    placeholder="••••••••"
-                    value={input.password}
-                    onChange={handleChange}
-                    required
+                    type={showPassword ? "text" : "password"}
+                    {...register("password")}
+                    error={!!errors.password}
+                    helperText={errors.password?.message}
                     fullWidth
                     InputProps={{
                       endAdornment: (
                         <InputAdornment position="end">
                           <IconButton
-                            aria-label="toggle password visibility"
                             onClick={() => setShowPassword(!showPassword)}
-                            edge="end"
                           >
-                            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                            {showPassword ? (
+                              <EyeOff size={20} />
+                            ) : (
+                              <Eye size={20} />
+                            )}
                           </IconButton>
                         </InputAdornment>
                       ),
@@ -127,21 +123,18 @@ export default function Login() {
                     type="submit"
                     variant="contained"
                     size="large"
-                    disabled={Boolean(loading)}
+                    disabled={loading}
                     fullWidth
-                    endIcon={loading ? <CircularProgress size={18} color="inherit" /> : undefined}
+                    endIcon={
+                      loading ? <CircularProgress size={18} /> : undefined
+                    }
                   >
-                    {loading ? "Loading..." : "Login"}
+                    {loading ? "Logging in..." : "Login"}
                   </Button>
 
-                  <Typography variant="body2" textAlign="center" sx={{ color: "text.secondary" }}>
-                    Don't have an account?{" "}
-                    <Button
-                      component={Link}
-                      to="/signup"
-                      variant="text"
-                      sx={{ textTransform: "none", px: 0.5, minWidth: 0, fontWeight: 700 }}
-                    >
+                  <Typography variant="body2" textAlign="center">
+                    Don&apos;t have an account?{" "}
+                    <Button component={Link} to="/signup" variant="text">
                       Sign Up
                     </Button>
                   </Typography>

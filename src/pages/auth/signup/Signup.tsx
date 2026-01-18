@@ -1,4 +1,3 @@
-import type React from "react";
 import { useEffect, useState } from "react";
 import Navbar from "../../../components/global/Navbar";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -6,6 +5,11 @@ import { toast } from "sonner";
 import { useDispatch, useSelector } from "react-redux";
 import { setLoadnig, setUser } from "./../../../../redux/authSlice";
 import axiosInstance from "@/utils/axios";
+
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { signupSchema, type SignupFormData } from "@/validators/auth.schema";
+
 import {
   Box,
   Button,
@@ -26,123 +30,103 @@ import {
 import { Eye, EyeOff } from "lucide-react";
 
 export default function Signup() {
-  const [input, setInput] = useState({
-    fullName: "",
-    email: "",
-    password: "",
-    // confirmPassword: "",
-    phoneNumber: "",
-    role: "",
-  });
   const [showPassword, setShowPassword] = useState(false);
+
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
   const { loading, user } = useSelector((store: any) => store.auth);
 
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<SignupFormData>({
+    resolver: zodResolver(signupSchema),
+  });
+
   useEffect(() => {
-    if (user && (user as any).email) {
+    if (user?.email) {
       const redirectTo = (location.state as any)?.from;
       navigate(redirectTo || "/", { replace: true });
     }
   }, [user, navigate, location.state]);
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setInput((input) => ({ ...input, [name]: value }));
-  };
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
 
-    const payload = {
-      fullName: input.fullName,
-      email: input.email,
-      password: input.password,
-      phoneNumber: input.phoneNumber,
-      role: input.role,
-    };
-
+  const onSubmit = async (data: SignupFormData) => {
     try {
       dispatch(setLoadnig(true));
-      const res = await axiosInstance.post(`/user/register`, payload, {
-        headers: { "Content-Type": "application/json" },
+
+      const res = await axiosInstance.post("/user/register", data, {
         withCredentials: true,
       });
+
       if (res.data.success) {
-        localStorage.setItem("token", res.data.token)
+        localStorage.setItem("token", res.data.token);
         dispatch(setUser(res.data.user));
         toast.success(res.data.message);
-        const redirectTo = (location.state as any)?.from;
-        navigate(redirectTo || "/");
-        dispatch(setLoadnig(false));
+        navigate("/");
       }
-    } catch (error) {
-      console.error("Error during signup:", error);
-      toast.error("Error during signup" + error);
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || "Signup failed");
+    } finally {
       dispatch(setLoadnig(false));
     }
   };
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-100">
       <Navbar />
+
       <Box sx={{ flex: 1, display: "flex", alignItems: "center" }}>
         <Container maxWidth="sm" sx={{ py: 4 }}>
-          <Paper elevation={8} sx={{ p: { xs: 3, sm: 4 }, borderRadius: 4, bgcolor: "rgba(255,255,255,0.92)" }}>
+          <Paper elevation={8} sx={{ p: 4, borderRadius: 4 }}>
             <Stack spacing={3}>
               <Box textAlign="center">
-                <Typography variant="h4" sx={{ fontWeight: 800 }}>
+                <Typography variant="h4" fontWeight={800}>
                   Create an Account
                 </Typography>
-                <Typography variant="body2" sx={{ color: "text.secondary", mt: 0.5 }}>
+                <Typography variant="body2" color="text.secondary">
                   Join Job Plus to find your dream job
                 </Typography>
               </Box>
 
-              <Box component="form" onSubmit={handleSubmit}>
+              <Box component="form" onSubmit={handleSubmit(onSubmit)}>
                 <Stack spacing={2}>
                   <TextField
-                    id="name"
-                    name="fullName"
                     label="Full Name"
-                    placeholder="Full name"
-                    value={input.fullName}
-                    onChange={handleChange}
-                    required
+                    {...register("fullName")}
+                    error={!!errors.fullName}
+                    helperText={errors.fullName?.message}
                     fullWidth
                   />
 
                   <TextField
-                    id="email"
-                    name="email"
-                    type="email"
                     label="Email"
-                    placeholder="name@example.com"
-                    value={input.email}
-                    onChange={handleChange}
-                    required
+                    type="email"
+                    {...register("email")}
+                    error={!!errors.email}
+                    helperText={errors.email?.message}
                     fullWidth
                   />
 
                   <TextField
-                    id="password"
-                    name="password"
-                    type={showPassword ? "text" : "password"}
                     label="Password"
-                    placeholder="••••••••"
-                    value={input.password}
-                    onChange={handleChange}
-                    required
+                    type={showPassword ? "text" : "password"}
+                    {...register("password")}
+                    error={!!errors.password}
+                    helperText={errors.password?.message}
                     fullWidth
                     InputProps={{
                       endAdornment: (
                         <InputAdornment position="end">
                           <IconButton
-                            aria-label="toggle password visibility"
                             onClick={() => setShowPassword(!showPassword)}
-                            edge="end"
                           >
-                            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                            {showPassword ? (
+                              <EyeOff size={20} />
+                            ) : (
+                              <Eye size={20} />
+                            )}
                           </IconButton>
                         </InputAdornment>
                       ),
@@ -150,49 +134,52 @@ export default function Signup() {
                   />
 
                   <TextField
-                    id="phoneNumber"
-                    name="phoneNumber"
                     label="Phone Number"
-                    placeholder="+92123456789"
-                    value={input.phoneNumber}
-                    onChange={handleChange}
-                    required
+                    {...register("phoneNumber")}
+                    error={!!errors.phoneNumber}
+                    helperText={errors.phoneNumber?.message}
                     fullWidth
                   />
 
-                  <FormControl>
-                    <FormLabel id="role-label">I am a</FormLabel>
-                    <RadioGroup
-                      row
-                      aria-labelledby="role-label"
-                      name="role"
-                      value={input.role}
-                      onChange={handleChange}
-                    >
-                      <FormControlLabel value="student" control={<Radio />} label="Student" />
-                      <FormControlLabel value="recruiter" control={<Radio />} label="Recruiter" />
+                  <FormControl error={!!errors.role}>
+                    <FormLabel>I am a</FormLabel>
+                    <RadioGroup row {...register("role")}>
+                      <FormControlLabel
+                        value="student"
+                        control={<Radio />}
+                        label="Student"
+                      />
+                      <FormControlLabel
+                        value="recruiter"
+                        control={<Radio />}
+                        label="Recruiter"
+                      />
                     </RadioGroup>
+                    {errors.role && (
+                      <Typography color="error" variant="caption">
+                        {errors.role.message}
+                      </Typography>
+                    )}
                   </FormControl>
 
                   <Button
                     type="submit"
                     variant="contained"
                     size="large"
-                    disabled={Boolean(loading)}
+                    disabled={loading}
                     fullWidth
-                    endIcon={loading ? <CircularProgress size={18} color="inherit" /> : undefined}
+                    endIcon={
+                      loading ? (
+                        <CircularProgress size={18} color="inherit" />
+                      ) : undefined
+                    }
                   >
-                    {loading ? "Loading..." : "Create Account"}
+                    {loading ? "Creating..." : "Create Account"}
                   </Button>
 
-                  <Typography variant="body2" textAlign="center" sx={{ color: "text.secondary" }}>
+                  <Typography variant="body2" align="center">
                     Already have an account?{" "}
-                    <Button
-                      component={Link}
-                      to="/login"
-                      variant="text"
-                      sx={{ textTransform: "none", px: 0.5, minWidth: 0, fontWeight: 700 }}
-                    >
+                    <Button component={Link} to="/login" variant="text">
                       Sign in
                     </Button>
                   </Typography>
